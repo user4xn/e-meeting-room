@@ -22,6 +22,9 @@
                 <div>Dashboard</div>
             </a>
         </li>
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">Manajemen</span>
+        </li>
         @foreach(listMenu() as $menu)
         @if(count($menu['sub_menu']) < 1) 
             <li class="menu-item {{ $parent_menu_active == $menu['menu'] ? 'active' : '' }}">
