@@ -44,6 +44,7 @@
         <div class="drag-target"></div>
     </div>
     @include('layouts.template.scripts')
+    @yield('scripts')
 </body>
 
 </html>

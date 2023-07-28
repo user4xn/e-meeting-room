@@ -42,7 +42,7 @@ class AuthController extends Controller
             if(Auth::user()->email_verified_at == null){
                 $hash = Crypt::encrypt($request->email);
                 $user = Auth::user();
-                Mail::to($user->email)->send(new EmailVerification($user->id));
+                // Mail::to($user->email)->send(new EmailVerification($user->id));
                 return redirect()->route('resend-verification', $hash);
             }
 

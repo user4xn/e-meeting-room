@@ -28,7 +28,7 @@
         @foreach(listMenu() as $menu)
         @if(count($menu['sub_menu']) < 1) 
             <li class="menu-item {{ $parent_menu_active == $menu['menu'] ? 'active' : '' }}">
-                <a href="/{{ strtolower($menu['menu']) }}" class="menu-link">
+                <a href="/{{ strtolower($menu['route']) }}" class="menu-link">
                     <i class="menu-icon tf-icons {{ $menu['icon'] }}"></i>
                     <div>{{$menu['menu']}}</div>
                 </a>

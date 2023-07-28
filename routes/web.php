@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MasterRoomController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UtilsController;
@@ -60,7 +61,11 @@ Route::middleware(['single.session'])->group(function() {
         Route::put('/update-password', [UserController::class, 'updateUserPassword'])->name('update-password');
     });
 
-    Route::prefix('room')->middleware(['auth'])->group(function () { 
-        Route::get('/', [AppController::class, 'index'])->name('room');
+    Route::prefix('master-ruangan')->middleware(['auth'])->group(function () { 
+        Route::get('/', [MasterRoomController::class, 'index'])->name('master-room');
+        Route::get('/datatable', [MasterRoomController::class, 'dataTable'])->name('master-room.datatable');
+        Route::post('/update-or-create', [MasterRoomController::class, 'updateOrCreate'])->name('master-room.updateOrCreate');
+        Route::post('/delete/{id}', [MasterRoomController::class, 'destroy'])->name('master-room.destroy');
+        Route::get('/edit/{id}', [MasterRoomController::class, 'edit'])->name('master-room.edit');
     });
 });
