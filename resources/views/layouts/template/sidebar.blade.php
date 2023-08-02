@@ -2,9 +2,9 @@
     <div class="app-brand demo">
         <a href="/" class="app-brand-link">
             <span class="app-brand-logo demo">
-                <img src="{{ asset('assets/app/').'/'.appDetail()->logo_image }}" alt="logo_image">
+                <img src="{{ asset('assets/app/')}}" alt="logo_image">
             </span>
-            <span class="app-brand-text demo menu-text fw-bolder" style="font-size: 17px!important;  font-family: 'Montserrat', sans-serif!important;">{{appDetail()->app_name}}</span>
+            <span class="app-brand-text demo menu-text fw-bolder" style="font-size: 17px!important;  font-family: 'Montserrat', sans-serif!important;"></span>
         </a>
 
         <a href="javascript:void(0);" style="margin-left:85px!important" class="layout-menu-toggle menu-link text-large ms-auto">

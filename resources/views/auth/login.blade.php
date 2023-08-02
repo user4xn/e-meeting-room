@@ -37,7 +37,7 @@
 
             <div class="d-none d-lg-flex col-lg-7 p-0">
                 <div class="auth-cover-bg auth-cover-bg-color d-flex justify-content-center align-items-center">
-                    <img src="{{ asset('assets/app/').'/'.appDetail()->illustration_image }}" alt="auth-login-cover" class="img-fluid my-5 auth-illustration" data-app-light-img="illustrations/login-ilustration.svg" data-app-dark-img="illustrations/login-ilustration.svg" />
+                    <img src="{{ asset('assets/app/') }}" alt="auth-login-cover" class="img-fluid my-5 auth-illustration" data-app-light-img="illustrations/login-ilustration.svg" data-app-dark-img="illustrations/login-ilustration.svg" />
 
                     <img src="../../assets/img/illustrations/bg-shape-image-light.png" alt="auth-login-cover" class="platform-bg" data-app-light-img="illustrations/bg-shape-image-light.png" data-app-dark-img="illustrations/bg-shape-image-dark.png" />
                 </div>

@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>@yield('title') | {{appDetail()->app_name}}</title>
+    <title>@yield('title') | </title>
 
     <meta name="description" content="" />
     @include('layouts.template.style')
@@ -30,7 +30,7 @@
                                     <script>
                                         document.write(new Date().getFullYear());
                                     </script>
-                                    , made with ❤️ by <a href="" target="_blank" class="fw-semibold">{{appDetail()->app_name}}</a>
+                                    , made with ❤️ by <a href="" target="_blank" class="fw-semibold"></a>
                                 </div>
                             </div>
                         </div>

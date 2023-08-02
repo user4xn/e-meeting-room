@@ -15,17 +15,10 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('role_id')->default(0);
-            $table->string('full_name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->string('username')->unique();
             $table->string('password');
-            $table->dateTime('last_password_changed')->nullable();
-            $table->string('phone_number', 16);
-            $table->string('no_sk', 100);
-            $table->string('nip', 50);
-            $table->enum('status', ['active', 'nonactive'])->default('active');
-            $table->dateTime('non_active_at')->nullable();
+            $table->enum('role', ['Admin', 'User']);
+            $table->enum('status', ['active', 'nonactive']);
             $table->rememberToken();
             $table->timestamps();
         });

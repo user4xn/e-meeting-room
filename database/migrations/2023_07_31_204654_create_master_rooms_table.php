@@ -13,12 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('app_configs', function (Blueprint $table) {
+        Schema::create('master_rooms', function (Blueprint $table) {
             $table->id();
-            $table->string('app_name');
-            $table->string('app_icon');
-            $table->string('illustration_image');
-            $table->string('logo_image');
+            $table->string('room_name');
+            $table->text('room_desc');
+            $table->integer('room_capacity')->default(0);
+            $table->timestamps();
         });
     }
 
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('app_configs');
+        Schema::dropIfExists('master_rooms');
     }
 };

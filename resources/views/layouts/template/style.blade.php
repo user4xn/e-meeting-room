@@ -1,4 +1,4 @@
-<link rel="icon" type="image/x-icon" href="{{ asset('assets/app/').'/'.appDetail()->app_icon }}" />
+<link rel="icon" type="image/x-icon" href="{{ asset('assets/app/')" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

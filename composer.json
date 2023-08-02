@@ -6,17 +6,21 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "bacon/bacon-qr-code": "^2.0",
         "barryvdh/laravel-dompdf": "^2.0",
         "dompdf/dompdf": "^2.0",
         "elgibor-solution/laravel-database-encryption": "^1.1",
         "guzzlehttp/guzzle": "^7.2",
+        "intervention/image": "^2.7",
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
         "laravel/ui": "^4.2",
         "maatwebsite/excel": "^3.1",
         "realrashid/sweet-alert": "^6.0",
+        "simplesoftwareio/simple-qrcode": "^4.2",
         "teampanfu/laravel-hcaptcha": "^1.1",
+        "tymon/jwt-auth": "^2.0",
         "yajra/laravel-datatables-oracle": "^10.3"
     },
     "require-dev": {
@@ -37,8 +41,7 @@
         "files": [
             "app/Helpers/SelectEncrypted.php",
             "app/Helpers/DateIndo.php",
-            "app/Helpers/DataMenu.php",
-            "app/Helpers/AppUtils.php"
+            "app/Helpers/DataMenu.php"
         ]
     },
     "autoload-dev": {
