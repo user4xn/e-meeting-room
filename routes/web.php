@@ -1,11 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\UtilsController;
+use App\Helpers\ResponseJson;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,4 +14,6 @@ use App\Http\Controllers\UtilsController;
 |
 */
 
-Route::get('/', [AuthController::class, 'login'])->name('login');
+Route::get('/', function () {
+    return view('welcome');
+});
