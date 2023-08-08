@@ -21,9 +21,9 @@ class EmailVerification extends Mailable
 
     public function build()
     {
-        $url = route('users.emailVerification', Crypt::encrypt($this->user_id));
+        $url = route('users.emailVerification').'?data='.Crypt::encrypt($this->user_id);
         return $this->subject('Verifikasi Email')
-                    ->from(env('MAIL_USERNAME'), 'E-Arsip Digital')
+                    ->from(env('MAIL_USERNAME'), 'E-Meeting')
                     ->markdown('emails.verification', ['url' => $url]);
     }
 }

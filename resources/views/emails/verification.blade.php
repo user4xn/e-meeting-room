@@ -44,11 +44,10 @@
 
 <body>
     <div class="box-container">
-        <img src="https://ik.imagekit.io/8vf52tkpd/logo-e-arsip.png?updatedAt=1679236868396" alt="">
         <h1>Konfirmasi Email</h1>
-        <p>verifikasi email kamu untuk mendapatkan akses ke e-arsip Digital.</p>
+        <p>verifikasi email kamu untuk mendapatkan akses ke e-meeting.</p>
         <a href="{{ $url }}" class="btn-verification">Konfirmasi</a>
-        <p>abaikan email ini jika kamu tidak merasa dalam anggota e-arsip Digital.</p>
+        <p>abaikan email ini jika kamu tidak merasa dalam anggota e-meeting.</p>
     </div>
 </body>
 

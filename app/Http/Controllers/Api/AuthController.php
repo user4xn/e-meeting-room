@@ -7,12 +7,13 @@ use Illuminate\Http\Request;
 use App\Helpers\ResponseJson;
 use App\Models\User;
 use Validator;
+use App\Mail\EmailVerification;
+use Illuminate\Support\Facades\Mail;
+use DB;
+use Crypt;
 
 class AuthController extends Controller
 {
-    public function __construct() {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
-    }
     public function login(Request $request)
     {
         try{
@@ -29,6 +30,13 @@ class AuthController extends Controller
             if (!$token = auth()->attempt($validator->validated())) {
                 return ResponseJson::response('failed', 'Unauthorized', 401, null);
             }
+            $user = $request->User();
+            if($user->email_verified_at == null){
+                $email = $user->email;
+                $user_id = $user->id;
+                Mail::to($email)->send(new EmailVerification($user_id));
+                return ResponseJson::response('failed', 'Please Verification Email', 400, null);
+            }
             return ResponseJson::response('success', 'login success', 200, $this->createNewToken($token)->original);
         }catch(\Exception $e){
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage() );
@@ -44,6 +52,28 @@ class AuthController extends Controller
                 ->first();
             return ResponseJson::response('success', 'Success Get Profile User', 200, $user);
         }catch(\Exception $e){
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage());
+        }
+    }
+
+    public function unauthorized(Request $request)
+    {
+        return ResponseJson::response('failed', 'Unauthorized', 401, null);
+    }
+
+    public function emailVerification(Request $request)
+    {
+        try {
+            $decrypted = Crypt::decrypt($request->data);
+            $user = User::findOrFail($decrypted);
+            if($user->email_verified_at == null){
+                $user->update([
+                    'email_verified_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+            DB::commit();
+            return ResponseJson::response('success', 'Success Verification', 200, null);
+        } catch (\Exception $e) {
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage());
         }
     }

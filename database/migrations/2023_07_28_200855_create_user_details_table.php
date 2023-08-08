@@ -18,7 +18,6 @@ return new class extends Migration
             $table->integer('user_id');
             $table->string('nik', 50);
             $table->string('name', 50);
-            $table->string('email', 50);
             $table->string('phone_number', 20);
             $table->text('address');
             $table->timestamps();

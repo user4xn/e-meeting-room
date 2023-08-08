@@ -21,11 +21,9 @@ class AuthController extends Controller
     
     public function login()
     {
-        $check = Auth::user();
-        if(!empty($check)) {
-            return redirect()->route('dashboard');
-        }
-        return view('auth.login');
+        return response()->json([
+            'message' => 'not authorized'
+        ], 401);
     }
 
     public function customLogin(Request $request)

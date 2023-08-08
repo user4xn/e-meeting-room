@@ -18,6 +18,7 @@ class UserSeeder extends Seeder
         User::create([
             'username' => 'esuperadmin', 
             'password'  => bcrypt('suksesemeeting2023'), 
+            'email' => 'bagus.candrabudi@gmail.com',
             'role'   => 'Admin',
             'status'   => 'active',
         ]);

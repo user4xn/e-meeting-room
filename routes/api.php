@@ -6,9 +6,13 @@ use App\Http\Controllers\Api\RentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::group(['prefix' => 'v1/auth'], function ($router) {
+    $router->post('/login', [AuthController::class, 'login']);
+    $router->get('/verification', [AuthController::class, 'emailVerification'])->name('users.emailVerification');
+    $router->get('/unauthorized', [AuthController::class, 'unauthorized'])->name('unauthorized');
+});
 Route::group(['middleware' => 'api'], function ($router) {
     Route::group(['prefix' => 'v1/auth'], function ($router) {
-        $router->post('/login', [AuthController::class, 'login']);
         $router->get('/get-profile', [AuthController::class, 'getProfileUser']);
     });
     Route::group(['prefix' => 'v1/room'], function ($router) {
