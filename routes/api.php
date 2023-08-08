@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'v1/auth'], function ($router) {
     $router->post('/login', [AuthController::class, 'login']);
     $router->get('/verification', [AuthController::class, 'emailVerification'])->name('users.emailVerification');
+    $router->post('/resend/otp', [AuthController::class, 'resendOtpEmail']);
+    $router->post('/verification/otp', [AuthController::class, 'verificationEmailOtp']);
     $router->get('/unauthorized', [AuthController::class, 'unauthorized'])->name('unauthorized');
 });
 Route::group(['middleware' => 'api'], function ($router) {
