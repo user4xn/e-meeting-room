@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Rent extends Model
 {
     use HasFactory;
+    
     public function getCreatedAtAttribute($value)
     {
         return date('Y-m-d H:i:s', strtotime($value));
