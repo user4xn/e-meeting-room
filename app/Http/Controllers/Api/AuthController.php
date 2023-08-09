@@ -42,9 +42,9 @@ class AuthController extends Controller
             //     return ResponseJson::response('failed', 'Please Verification Email', 400, null);
             // }
             $check_log = $this->checkUserLogin($request, $email);
-            if($check_log == "Please Verification OTP"){
-                return ResponseJson::response('failed', 'Please Verification Login With OTP.', 400, null);
-            }
+            // if($check_log == "Please Verification OTP"){
+            //     return ResponseJson::response('failed', 'Please Verification Login With OTP.', 400, null);
+            // }
             if($check_log == "new ip"){
                 $data = array(
                     'data_auth' => $this->createNewToken($token)->original,
@@ -116,13 +116,13 @@ class AuthController extends Controller
     }
     private function checkUserLogin($request, $email)
     {
-        $check_otp = UserEmailOtp::where('user_id', Auth::user()->id)
-            ->where('is_verif', 0)
-            ->select('id')
-            ->first();
-        if($check_otp){
-            return "Please Verification OTP";
-        }
+        // $check_otp = UserEmailOtp::where('user_id', Auth::user()->id)
+        //     ->where('is_verif', 0)
+        //     ->select('id')
+        //     ->first();
+        // if($check_otp){
+        //     return "Please Verification OTP";
+        // }
         $ipAddress = "";
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             $ipAddress = $_SERVER['HTTP_CLIENT_IP'];
