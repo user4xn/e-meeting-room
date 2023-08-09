@@ -70,6 +70,10 @@ class User extends Authenticatable implements JWTSubject
     }
     public function getEmailVerifiedAtAttribute($value)
     {
-        return date('Y-m-d H:i:s', strtotime($value));
+        if($value != null){
+            return date('Y-m-d H:i:s', strtotime($value));
+        }else{
+            return null;
+        }
     }
 }

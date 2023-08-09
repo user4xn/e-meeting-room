@@ -40,6 +40,7 @@ class EmailOtpLogin extends Mailable
     {
         $otp = strval(rand(100000, 999999));
         $check_otp = UserEmailOtp::where('user_id', $this->user_id)
+            ->where('is_verif', 0)
             ->first();
         if($check_otp){
             $check_otp->user_id = $this->user_id;

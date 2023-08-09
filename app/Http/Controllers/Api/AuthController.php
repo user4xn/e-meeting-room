@@ -41,6 +41,17 @@ class AuthController extends Controller
                 Mail::to($email)->send(new EmailVerification($user_id));
                 return ResponseJson::response('failed', 'Please Verification Email', 400, null);
             }
+            // $check_otp = UserEmailOtp::where('user_id', $user_id)
+            //     ->where('is_verif', 0)
+            //     ->select('id')
+            //     ->first();
+            // if($check_otp){
+            //     $data = array(
+            //         'data_auth' => $this->createNewToken($token)->original,
+            //         'is_verification_otp' => true,
+            //     );
+            //     return ResponseJson::response('success', 'login success', 200, $data);
+            // }
             $check_log = $this->checkUserLogin($request, $email);
             if($check_log == "Please Verification OTP"){
                 return ResponseJson::response('failed', 'Please Verification Login With OTP.', 400, null);
@@ -86,14 +97,28 @@ class AuthController extends Controller
         if(!$check_user){
             return ResponseJson::response('failed', 'No Data User.', 404, null);
         }
-        $check_otp = UserEmailOtp::where('id', $check_user->id)
+        $check_otp = UserEmailOtp::where('user_id', $check_user->id)
             ->where('otp', $otp)
             ->select('id')
             ->first();
+
         if(!$check_otp){
             return ResponseJson::response('failed', 'Missing Otp Email.', 400, null);
         }
+        $ipAddress = "";
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ipAddress = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ipAddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ipAddress = $_SERVER['REMOTE_ADDR'];
+        }
 
+        $log = new UserLog();
+        $log->user_id = $check_user->id;
+        $log->ip_address = $ipAddress;
+        $log->user_agent = $request->header('User-Agent');
+        $log->save();
         UserEmailOtp::where('id', $check_otp->id)
             ->update([
                 'is_verif' => 1,
@@ -117,19 +142,20 @@ class AuthController extends Controller
         } else {
             $ipAddress = $_SERVER['REMOTE_ADDR'];
         }
+        $user_id = Auth::user()->id;
         $check = UserLog::where('ip_address', $ipAddress)
+            ->where('user_id', $user_id)
             ->select('id')
             ->first();
-        $user_id = Auth::user()->id;
         if(!$check){
+            Mail::to($email)->send(new EmailOtpLogin($user_id));
+            return "new ip";
+        }else{
             $log = new UserLog();
             $log->user_id = Auth::user()->id;
             $log->ip_address = $ipAddress;
             $log->user_agent = $request->header('User-Agent');
             $log->save();
-            Mail::to($email)->send(new EmailOtpLogin($user_id));
-            return "new ip";
-        }else{
             return "existing ip";
         }
     }
