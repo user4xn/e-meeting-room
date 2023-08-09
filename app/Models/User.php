@@ -58,4 +58,18 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(UserDetail::class, 'user_id');
     }
+
+    public function getCreatedAtAttribute($value)
+    {
+        return date('Y-m-d H:i:s', strtotime($value));
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        return date('Y-m-d H:i:s', strtotime($value));
+    }
+    public function getEmailVerifiedAtAttribute($value)
+    {
+        return date('Y-m-d H:i:s', strtotime($value));
+    }
 }
