@@ -37,20 +37,9 @@ class AuthController extends Controller
             $user = $request->User();
             $email = $user->email;
             $user_id = $user->id;
-            if($user->email_verified_at == null){
-                Mail::to($email)->send(new EmailVerification($user_id));
-                return ResponseJson::response('failed', 'Please Verification Email', 400, null);
-            }
-            // $check_otp = UserEmailOtp::where('user_id', $user_id)
-            //     ->where('is_verif', 0)
-            //     ->select('id')
-            //     ->first();
-            // if($check_otp){
-            //     $data = array(
-            //         'data_auth' => $this->createNewToken($token)->original,
-            //         'is_verification_otp' => true,
-            //     );
-            //     return ResponseJson::response('success', 'login success', 200, $data);
+            // if($user->email_verified_at == null){
+            //     Mail::to($email)->send(new EmailVerification($user_id));
+            //     return ResponseJson::response('failed', 'Please Verification Email', 400, null);
             // }
             $check_log = $this->checkUserLogin($request, $email);
             if($check_log == "Please Verification OTP"){
