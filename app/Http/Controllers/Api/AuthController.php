@@ -130,7 +130,6 @@ class AuthController extends Controller
             Mail::to($email)->send(new EmailOtpLogin($user_id));
             return "new ip";
         }else{
-            Mail::to($email)->send(new EmailOtpLogin($user_id));
             return "existing ip";
         }
     }
