@@ -6,13 +6,13 @@ use Auth;
 use DB;
 class ResponseJson
 {
-    public static function response($message, $status, $code, $data)
+    public static function response($status, $message, $code, $data)
     {
         $response = array(
             'meta' => [
-                'message' => $message,
-                'code' => $code,
                 'status' => $status, 
+                'code' => $code,
+                'message' => $message,
             ],
             'data' => $data,
         );
