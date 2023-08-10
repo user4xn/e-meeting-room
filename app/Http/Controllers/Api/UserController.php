@@ -27,7 +27,7 @@ class UserController extends Controller
                 ->first();
             return ResponseJson::response('success', 'Success Get Profile User', 200, $user);
         }catch(\Exception $e){
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage());
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
     }
 
@@ -50,7 +50,7 @@ class UserController extends Controller
             return ResponseJson::response('success', 'Success Verification', 200, null);
         } catch (\Exception $e) {
             DB::rollback();
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage());
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
     }
 

@@ -51,7 +51,7 @@ class AuthController extends Controller
             );
             return ResponseJson::response('success', 'login success', 200, $data);
         }catch(\Exception $e){
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage() );
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
     }
 
