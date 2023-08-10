@@ -9,6 +9,7 @@ use App\Models\MasterRoom;
 use DataTables;
 use Validator;
 use DB;
+use Auth;
 class MasterRoomController extends Controller
 {
     public function __construct() {
@@ -17,6 +18,10 @@ class MasterRoomController extends Controller
     public function index()
     {
         try{
+            $check_user = Auth::user();
+            if($check_user->role_name != "Admin"){
+                return ResponseJson::response('failed', 'You not have access!', 403, null); 
+            }
             $fetch = MasterRoom::orderBy('created_at', 'DESC')
                 ->get()
                 ->toArray();
@@ -43,6 +48,10 @@ class MasterRoomController extends Controller
 
     public function store(Request $request)
     {
+        $check_user = Auth::user();
+        if($check_user->role_name != "Admin"){
+            return ResponseJson::response('failed', 'You not have access!', 403, null); 
+        }
         $validator = Validator::make($request->all(), [
             'room_name' => 'required|string',
             'room_desc' => 'required|string',
@@ -73,6 +82,10 @@ class MasterRoomController extends Controller
 
     public function detail($id)
     {
+        $check_user = Auth::user();
+        if($check_user->role_name != "Admin"){
+            return ResponseJson::response('failed', 'You not have access!', 403, null); 
+        }
         try{
             $room = MasterRoom::where('id', $id)
                 ->first();
@@ -88,6 +101,10 @@ class MasterRoomController extends Controller
 
     public function update(Request $request, $id)
     {
+        $check_user = Auth::user();
+        if($check_user->role_name != "Admin"){
+            return ResponseJson::response('failed', 'You not have access!', 403, null); 
+        }
         $room = MasterRoom::where('id', $id)
                 ->first();
         if(!$room){
@@ -112,6 +129,10 @@ class MasterRoomController extends Controller
 
     public function destroy($id)
     {
+        $check_user = Auth::user();
+        if($check_user->role_name != "Admin"){
+            return ResponseJson::response('failed', 'You not have access!', 403, null); 
+        }
         $room = MasterRoom::where('id', $id)
                 ->first();
         if(!$room){
