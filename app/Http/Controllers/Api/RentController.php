@@ -10,29 +10,13 @@ use App\Models\Rent;
 use App\Models\User;
 use DB;
 use Validator;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Intervention\Image\Facades\Image;
-
-
 class RentController extends Controller
 {
-    // public function __construct() {
-    //     $this->middleware('auth:api');
-    // }
+    public function __construct() {
+        $this->middleware('auth:api');
+    }
     public function index(Request $request)
     {
-        $data = QrCode::size(512)
-        // ->format('png')
-        // ->merge('https://png.pngtree.com/png-vector/20221018/ourmid/pngtree-twitter-social-media-round-icon-png-image_6315985.png')
-        ->errorCorrection('M')
-        ->generate(
-            'https://twitter.com/HarryKir',
-        );
-
-    $data2 = response($data);
-
-    return base64_encode($data2);
-
         try{
             $rents = Rent::when($request->status, function($query) use ($request) {
                     return $query->where('status', $request->status);
@@ -184,25 +168,6 @@ class RentController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage());
-        }
-    }
-
-    private function generateQRCodeBase64($data, $size = 200) {
-        try {
-            // Generate the QR code as a binary string
-            $qrCodeImage = QrCode::size($size)->generate($data);
-    
-            // Create an Intervention Image from the binary string
-            $image = Image::make($qrCodeImage);
-    
-            // Convert the Intervention Image to Base64 representation
-            $base64Image = $image->encode('data-url')->encoded;
-    
-            return $base64Image;
-        } catch (\Exception $e) {
-            // Log or handle the exception as needed
-            // For debugging purposes, you can also use var_dump($e->getMessage());
-            return null;
         }
     }
 }
