@@ -16,17 +16,18 @@ use DB;
 use Auth;
 use Session;
 use Crypt;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        try{
+        try {
             $validator = Validator::make($request->all(), [
                 'username' => 'required',
                 'password' => 'required|string|min:6',
-            ],[
-                'username' => 'Please Input Request Email.', 
+            ], [
+                'username' => 'Please Input Request Email.',
                 'password' => 'Please Input Request Password.'
             ]);
             if ($validator->fails()) {
@@ -37,20 +38,21 @@ class AuthController extends Controller
             }
             $user = $request->User();
             $email = $user->email;
+            $token_jwt = JWTAuth::fromUser($user);
             $check_log = $this->checkUserLogin($request, $email);
-            if($check_log == "new ip"){
+            if ($check_log == "new ip") {
                 $data = array(
-                    'data_auth' => $this->createNewToken($token)->original,
+                    'data_auth' => $this->createNewToken($token_jwt)->original,
                     'is_verification_otp' => true,
                 );
                 return ResponseJson::response('success', 'login success', 200, $data);
             }
             $data = array(
-                'data_auth' => $this->createNewToken($token)->original,
+                'data_auth' => $this->createNewToken($token_jwt)->original,
                 'is_verification_otp' => false,
             );
             return ResponseJson::response('success', 'login success', 200, $data);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
     }
@@ -61,7 +63,7 @@ class AuthController extends Controller
         $check_user = User::where('email', $email)
             ->select('id')
             ->first();
-        if(!$check_user){
+        if (!$check_user) {
             return ResponseJson::response('failed', 'No Data User.', 404, null);
         }
         $user_id = $check_user->id;
@@ -76,7 +78,7 @@ class AuthController extends Controller
         $check_user = User::where('email', $email)
             ->select('id')
             ->first();
-        if(!$check_user){
+        if (!$check_user) {
             return ResponseJson::response('failed', 'No Data User.', 404, null);
         }
         $check_otp = UserEmailOtp::where('user_id', $check_user->id)
@@ -85,7 +87,7 @@ class AuthController extends Controller
             ->select('id')
             ->first();
 
-        if(!$check_otp){
+        if (!$check_otp) {
             return ResponseJson::response('failed', 'Missing Otp Email.', 400, null);
         }
         $ipAddress = "";
@@ -123,10 +125,10 @@ class AuthController extends Controller
             ->where('user_id', $user_id)
             ->select('id')
             ->first();
-        if(!$check){
+        if (!$check) {
             Mail::to($email)->send(new EmailOtpLogin($user_id));
             return "new ip";
-        }else{
+        } else {
             $log = new UserLog();
             $log->user_id = Auth::user()->id;
             $log->ip_address = $ipAddress;
@@ -137,12 +139,8 @@ class AuthController extends Controller
     }
 
 
-    public function unauthorized(Request $request)
+    protected function createNewToken($token)
     {
-        return ResponseJson::response('failed', 'Unauthorized', 401, null);
-    }
-
-    protected function createNewToken($token){
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
@@ -154,13 +152,34 @@ class AuthController extends Controller
     public function logout()
     {
 
-        try{
+        try {
             Session::flush();
             Auth::logout();
             return ResponseJson::response('success', 'Success Logout.', 200, null);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return ResponseJson::response('failed', 'Invalid Token!.', 500, ['error' => $e->getMessage()]);
         }
-        
+    }
+    public function refresh(Request $request)
+    {
+       try{
+        $token = JWTAuth::getToken();
+        $newToken = JWTAuth::refresh($token, ['custom_claim' => 'value'], 10);
+        $data = array(
+            'access_token' => $newToken,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 6000,
+            'data' => auth()->user()
+        );
+
+        return ResponseJson::response('success', 'Success Refresh Token.', 200, $data);
+
+       }catch(\Exception $e){
+            return ResponseJson::response('failed', 'Something Wrong Error!.', 500, ['error' => $e->getMessage()]);
+       }
+    }
+    public function unauthorized(Request $request)
+    {
+        return ResponseJson::response('failed', 'Unauthorized', 401, null);
     }
 }

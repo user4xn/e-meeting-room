@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1/auth'], function ($router) {
     $router->post('/login', [AuthController::class, 'login']);
+    $router->post('/refresh/token', [AuthController::class, 'refresh']);
     $router->get('/verification/email', [UserController::class, 'emailVerification'])->name('users.emailVerification');
     $router->post('/resend/otp', [AuthController::class, 'resendOtpEmail']);
     $router->post('/resend/verification', [UserController::class, 'resendEmailVerification']);

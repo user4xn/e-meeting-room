@@ -11,6 +11,7 @@ use Crypt;
 use DB;
 use Auth;
 use Illuminate\Support\Facades\Mail;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
