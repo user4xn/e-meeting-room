@@ -14,6 +14,7 @@ use App\Models\UserLog;
 use Illuminate\Support\Facades\Mail;
 use DB;
 use Auth;
+use Session;
 use Crypt;
 
 class AuthController extends Controller
@@ -36,15 +37,7 @@ class AuthController extends Controller
             }
             $user = $request->User();
             $email = $user->email;
-            $user_id = $user->id;
-            // if($user->email_verified_at == null){
-            //     Mail::to($email)->send(new EmailVerification($user_id));
-            //     return ResponseJson::response('failed', 'Please Verification Email', 400, null);
-            // }
             $check_log = $this->checkUserLogin($request, $email);
-            // if($check_log == "Please Verification OTP"){
-            //     return ResponseJson::response('failed', 'Please Verification Login With OTP.', 400, null);
-            // }
             if($check_log == "new ip"){
                 $data = array(
                     'data_auth' => $this->createNewToken($token)->original,
@@ -88,6 +81,7 @@ class AuthController extends Controller
         }
         $check_otp = UserEmailOtp::where('user_id', $check_user->id)
             ->where('otp', $otp)
+            ->where('is_verif', 0)
             ->select('id')
             ->first();
 
@@ -116,13 +110,6 @@ class AuthController extends Controller
     }
     private function checkUserLogin($request, $email)
     {
-        // $check_otp = UserEmailOtp::where('user_id', Auth::user()->id)
-        //     ->where('is_verif', 0)
-        //     ->select('id')
-        //     ->first();
-        // if($check_otp){
-        //     return "Please Verification OTP";
-        // }
         $ipAddress = "";
         if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
             $ipAddress = $_SERVER['HTTP_CLIENT_IP'];
@@ -149,39 +136,10 @@ class AuthController extends Controller
         }
     }
 
-    public function getProfileUser(Request $request)
-    {
-        try{
-            $user = User::select('id', 'username', 'role', 'status')
-                ->where('id', $request->User()->id)
-                ->with('userDetail')
-                ->first();
-            return ResponseJson::response('success', 'Success Get Profile User', 200, $user);
-        }catch(\Exception $e){
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage());
-        }
-    }
 
     public function unauthorized(Request $request)
     {
         return ResponseJson::response('failed', 'Unauthorized', 401, null);
-    }
-
-    public function emailVerification(Request $request)
-    {
-        try {
-            $decrypted = Crypt::decrypt($request->data);
-            $user = User::findOrFail($decrypted);
-            if($user->email_verified_at == null){
-                $user->update([
-                    'email_verified_at' => date('Y-m-d H:i:s')
-                ]);
-            }
-            DB::commit();
-            return ResponseJson::response('success', 'Success Verification', 200, null);
-        } catch (\Exception $e) {
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage());
-        }
     }
 
     protected function createNewToken($token){
@@ -191,5 +149,18 @@ class AuthController extends Controller
             'expires_in' => auth()->factory()->getTTL() * 6000,
             'data' => auth()->user()
         ]);
+    }
+
+    public function logout()
+    {
+
+        try{
+            Session::flush();
+            Auth::logout();
+            return ResponseJson::response('success', 'Success Logout.', 200, null);
+        }catch(\Exception $e){
+            return ResponseJson::response('failed', 'Invalid Token!.', 500, ['error' => $e->getMessage()]);
+        }
+        
     }
 }

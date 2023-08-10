@@ -3,19 +3,22 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MasterRoomController;
 use App\Http\Controllers\Api\RentController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1/auth'], function ($router) {
     $router->post('/login', [AuthController::class, 'login']);
-    $router->get('/verification', [AuthController::class, 'emailVerification'])->name('users.emailVerification');
+    $router->get('/verification/email', [UserController::class, 'emailVerification'])->name('users.emailVerification');
     $router->post('/resend/otp', [AuthController::class, 'resendOtpEmail']);
+    $router->post('/resend/verification', [UserController::class, 'resendEmailVerification']);
     $router->post('/verification/otp', [AuthController::class, 'verificationEmailOtp']);
     $router->get('/unauthorized', [AuthController::class, 'unauthorized'])->name('unauthorized');
 });
 Route::group(['middleware' => 'api'], function ($router) {
     Route::group(['prefix' => 'v1/auth'], function ($router) {
-        $router->get('/get-profile', [AuthController::class, 'getProfileUser']);
+        $router->get('/get-profile', [UserController::class, 'getProfileUser']);
+        $router->post('/logout', [UserController::class, 'logout']);
     });
     Route::group(['prefix' => 'v1/room'], function ($router) {
         $router->get('/', [MasterRoomController::class, 'index']);
