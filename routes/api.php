@@ -19,7 +19,13 @@ Route::group(['prefix' => 'v1/auth'], function ($router) {
 Route::group(['middleware' => 'api'], function ($router) {
     Route::group(['prefix' => 'v1/auth'], function ($router) {
         $router->get('/get-profile', [UserController::class, 'getProfileUser']);
-        $router->post('/logout', [UserController::class, 'logout']);
+        $router->post('/logout', [AuthController::class, 'logout']);
+    });
+    Route::group(['prefix' => 'v1/users'], function ($router) {
+        $router->get('/list', [UserController::class, 'index']);
+        $router->post('/store', [UserController::class, 'store']);
+        $router->post('/update/{id}', [UserController::class, 'update']);
+        $router->delete('/delete/{id}', [UserController::class, 'destroy']);
     });
     Route::group(['prefix' => 'v1/room'], function ($router) {
         $router->get('/', [MasterRoomController::class, 'index']);

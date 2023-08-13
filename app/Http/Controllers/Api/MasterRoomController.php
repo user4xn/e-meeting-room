@@ -19,7 +19,7 @@ class MasterRoomController extends Controller
     {
         try{
             $check_user = Auth::user();
-            if($check_user->role_name != "Admin"){
+            if($check_user->role != "Admin"){
                 return ResponseJson::response('failed', 'You not have access!', 403, null); 
             }
             $fetch = MasterRoom::orderBy('created_at', 'DESC')
@@ -39,10 +39,16 @@ class MasterRoomController extends Controller
             }, $fetch);
             
             $datatables =  DataTables::of($reform)->make(true);
-            return ResponseJson::response('success', 'Success Get List Room.', 200, $datatables); 
+            $data = array(
+                'draw' => $datatables->original['draw'],
+                'recordsTotal' => $datatables->original['recordsTotal'],
+                'recordsFiltered' => $datatables->original['recordsFiltered'],
+                'data' => $datatables->original['data']
+            );
+            return ResponseJson::response('success', 'Success Get List Room.', 200, $data); 
             
         }catch(\Exception $e){
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage()); 
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
         }
     }
 
@@ -62,7 +68,7 @@ class MasterRoomController extends Controller
             'room_capacity' => 'Please Input Request room_capacity.'
         ]);
         if ($validator->fails()) {
-            return ResponseJson::response('failed', 'Error Validation', 422, $validator->errors());
+            return ResponseJson::response('failed', 'Error Validation', 422, ['errpr' => $validator->errors()]);
         }
         DB::beginTransaction();
         try{
@@ -76,7 +82,7 @@ class MasterRoomController extends Controller
             
         }catch(\Exception $e){
             DB::rollback();
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage()); 
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
         }
     }
 
@@ -95,7 +101,7 @@ class MasterRoomController extends Controller
             return ResponseJson::response('success', 'Success Get Detail Master Room.', 200, $room); 
             
         }catch(\Exception $e){
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage()); 
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
         }
     }
 
@@ -123,7 +129,7 @@ class MasterRoomController extends Controller
             return ResponseJson::response('success', 'Success Update Master Room.', 200, $room); 
         }catch(\Exception $e){
             DB::rollback();
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage()); 
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
         }
     }
 
@@ -146,7 +152,7 @@ class MasterRoomController extends Controller
             return ResponseJson::response('success', 'Success Delete Master Room.', 200, null); 
         }catch(\Exception $e){
             DB::rollback();
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage()); 
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
         }
     }
 }
