@@ -36,6 +36,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     });
     Route::group(['prefix' => 'v1/rent'], function ($router) {
         $router->get('/', [RentController::class, 'index']);
+        $router->get('/calendar', [RentController::class, 'listCalendar']);
         $router->get('/list-person-responsible', [RentController::class, 'listPersonResponsible']);
         $router->post('/store', [RentController::class, 'store']);
         $router->get('/detail/{id}', [RentController::class, 'detail']);

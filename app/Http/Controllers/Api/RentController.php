@@ -29,6 +29,32 @@ class RentController extends Controller
         }
     }
 
+    public function listCalendar()
+    {
+        try{
+            $fetch = Rent::get()->toArray();
+
+            $i = 0;
+            $reform = array_map(function($new) use (&$i) { 
+                $i++;
+                return [
+                    'id' => $new['id'],
+                    'url' => '',
+                    'title' => $new['event_name'],
+                    'start' => $new['date_start'],
+                    'end' => $new['date_end'],
+                    'allDay' => false,
+                    'extendedProps' => array([
+                        'calendar' => $new['organization']
+                    ])
+                ]; 
+            }, $fetch);
+            return ResponseJson::response('success', 'Success Get List Calendar.', 200, ['events' => $reform]); 
+        }catch(\Exception $e){
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
+        }
+    }
+
     public function listPersonResponsible()
     {
         try{
