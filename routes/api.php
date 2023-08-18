@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MasterRoomController;
 use App\Http\Controllers\Api\RentController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\GuestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,9 @@ Route::group(['prefix' => 'v1/auth'], function ($router) {
     $router->post('/resend/verification', [UserController::class, 'resendEmailVerification']);
     $router->post('/verification/otp', [AuthController::class, 'verificationEmailOtp']);
     $router->get('/unauthorized', [AuthController::class, 'unauthorized'])->name('unauthorized');
+});
+Route::group(['prefix' => 'v1/guest'], function ($router) {
+    $router->post('/store', [GuestController::class, 'store'])->name('guest.store');
 });
 Route::group(['middleware' => 'api'], function ($router) {
     Route::group(['prefix' => 'v1/auth'], function ($router) {
