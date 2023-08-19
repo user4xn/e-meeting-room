@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\GuestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
 Route::group(['prefix' => 'v1/auth'], function ($router) {
     $router->post('/login', [AuthController::class, 'login']);
     $router->post('/refresh/token', [AuthController::class, 'refresh']);

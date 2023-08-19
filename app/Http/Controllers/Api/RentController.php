@@ -10,6 +10,9 @@ use App\Models\Rent;
 use App\Models\User;
 use DB;
 use Validator;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Intervention\Image\Facades\Image;
+use Spatie\Browsershot\Browsershot;
 class RentController extends Controller
 {
     public function __construct() {
@@ -17,16 +20,51 @@ class RentController extends Controller
     }
     public function index(Request $request)
     {
-        try{
-            $rents = Rent::when($request->status, function($query) use ($request) {
-                    return $query->where('status', $request->status);
-                })
-                ->get();
-            return ResponseJson::response('success', 'Success Get List Rent.', 200, $rents); 
-            
-        }catch(\Exception $e){
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage()); 
+        try {
+            $fetch = Rent::when($request->status, function ($query) use ($request) {
+                return $query->where('status', $request->status);
+            })->get()->toArray();
+            $folderPath = public_path('qrcodes');
+            if (!file_exists($folderPath)) {
+                mkdir($folderPath, 0777, true);
+            }
+            $reform = array_map(function ($new) {
+                $data = [
+                    'rent_id' => $new['id'], 
+                    'room_id' => $new['room_id']
+                ];
+                $dataString = json_encode($data);
+                $name_file = str_replace(' ','_', $new['event_name']);
+                $folderPath = public_path('qrcodes');
+                $qrcode = QrCode::size(300)->generate($dataString);
+                $svgPath = $folderPath . '/qrcode_' . $name_file . '.svg';
+                file_put_contents($svgPath, $qrcode);
+
+                return [
+                    'id' => $new['id'],
+                    'user_id' => $new['user_id'],
+                    'room_id' => $new['room_id'],
+                    'date_start' => $new['date_start'],
+                    'date_end' => $new['date_end'],
+                    'time_start' => $new['time_start'],
+                    'time_end' => $new['time_end'],
+                    'event_name' => $new['event_name'],
+                    'event_desc' => $new['event_desc'],
+                    'guest_count' => $new['guest_count'],
+                    'organization' => $new['organization'],
+                    'status' => $new['status'],
+                    'notes' => $new['notes'],
+                    'qrcode' => asset('qrcodes/qrcode_'.$name_file.'.svg'),
+                    'created_at' => $new['created_at'],
+                    'updated_at' => $new['updated_at'],
+                ];
+            }, $fetch);
+        
+            return ResponseJson::response('success', 'Success Get List Rent.', 200, $reform);
+        } catch (\Exception $e) {
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage());
         }
+        
     }
 
     public function listCalendar()
