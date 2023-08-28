@@ -10,6 +10,7 @@ use DataTables;
 use Validator;
 use DB;
 use Auth;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class MasterRoomController extends Controller
 {
     public function __construct() {
@@ -154,5 +155,23 @@ class MasterRoomController extends Controller
             DB::rollback();
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
         }
+    }
+
+    public function createQrcode($room_id)
+    {
+        $check_room = MasterRoom::where('id', $room_id)
+            ->select('id')
+            ->first();
+        if(!$check_room){
+            return ResponseJson::response('failed', 'Master Room Not Found.', 400, null); 
+        }
+        $data = [
+            'room_id' => $room_id
+        ];
+        
+        $qrCode = QrCode::size(300)->generate(json_encode($data));
+        $base64 = 'data:image/png;base64,' . base64_encode($qrCode);
+        
+        return ResponseJson::response('success', 'Success Delete Master Room.', 200, ['qrcode' => $base64]); 
     }
 }

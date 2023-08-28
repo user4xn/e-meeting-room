@@ -11,8 +11,6 @@ use App\Models\User;
 use DB;
 use Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Intervention\Image\Facades\Image;
-use Spatie\Browsershot\Browsershot;
 class RentController extends Controller
 {
     public function __construct() {

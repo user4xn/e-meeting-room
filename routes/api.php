@@ -36,6 +36,7 @@ Route::group(['middleware' => 'api'], function ($router) {
         $router->get('/detail/{id}', [MasterRoomController::class, 'detail']);
         $router->post('/update/{id}', [MasterRoomController::class, 'update']);
         $router->delete('/delete/{id}', [MasterRoomController::class, 'destroy']);
+        $router->get('/qrcode/{id}', [MasterRoomController::class, 'createQrcode']);
     });
     Route::group(['prefix' => 'v1/rent'], function ($router) {
         $router->get('/', [RentController::class, 'index']);
