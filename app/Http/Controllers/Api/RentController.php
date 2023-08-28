@@ -240,6 +240,7 @@ class RentController extends Controller
                 ->where('date_start', $date_now)
                 ->where('time_start', '<=', $time_now)
                 ->where('time_end', '>=', $time_now)
+                ->where('status', 'approved')
                 ->first();
 
             return ResponseJson::response('success', 'Get List Current Meeting.', 200, $check_rent);
