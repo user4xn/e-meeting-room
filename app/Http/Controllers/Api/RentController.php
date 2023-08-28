@@ -8,14 +8,12 @@ use App\Helpers\ResponseJson;
 use App\Models\MasterRoom;
 use App\Models\Rent;
 use App\Models\User;
+use Carbon\Carbon;
 use DB;
 use Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class RentController extends Controller
 {
-    public function __construct() {
-        $this->middleware('auth:api');
-    }
     public function index(Request $request)
     {
         try {
@@ -60,7 +58,7 @@ class RentController extends Controller
         
             return ResponseJson::response('success', 'Success Get List Rent.', 200, $reform);
         } catch (\Exception $e) {
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage());
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
         
     }
@@ -102,7 +100,7 @@ class RentController extends Controller
             return ResponseJson::response('success', 'Success Get List Person Responsible.', 200, $users); 
             
         }catch(\Exception $e){
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage()); 
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
         }
     }
 
@@ -166,7 +164,7 @@ class RentController extends Controller
             
         }catch(\Exception $e){
             DB::rollback();
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage()); 
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
         }
     }
 
@@ -181,7 +179,7 @@ class RentController extends Controller
             return ResponseJson::response('success', 'Success Get Detail Rent.', 200, $rent); 
             
         }catch(\Exception $e){
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage()); 
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
         }
     }
 
@@ -229,7 +227,24 @@ class RentController extends Controller
             return ResponseJson::response('success', 'Success Update Status Rent.', 200, null);
         } catch (\Exception $e) {
             DB::rollback();
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, $e->getMessage());
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
+        }
+    }
+
+    public function currentMeeting($room_id)
+    {
+        try{
+            $date_now = Carbon::now()->format('Y-m-d');
+            $time_now = Carbon::now()->format('H:i:s');
+            $check_rent = Rent::where('room_id', $room_id)
+                ->where('date_start', $date_now)
+                ->where('time_start', '<=', $time_now)
+                ->where('time_end', '>=', $time_now)
+                ->first();
+
+            return ResponseJson::response('success', 'Get List Current Meeting.', 200, $check_rent);
+        }catch(\Exception $e){
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
     }
 }

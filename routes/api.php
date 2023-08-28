@@ -19,18 +19,19 @@ Route::group(['prefix' => 'v1/auth'], function ($router) {
 Route::group(['prefix' => 'v1/guest'], function ($router) {
     $router->post('/store', [GuestController::class, 'store'])->name('guest.store');
 });
-Route::group(['middleware' => 'api'], function ($router) {
-    Route::group(['prefix' => 'v1/auth'], function ($router) {
+$router->get('/v1/list/current-meeting/{room_id}', [RentController::class, 'currentMeeting'])->name('list_current_meeting');
+Route::group(['middleware' => 'auth:api'], function ($router) {
+    $router->group(['prefix' => 'v1/auth'], function ($router) {
         $router->get('/get-profile', [UserController::class, 'getProfileUser']);
         $router->post('/logout', [AuthController::class, 'logout']);
     });
-    Route::group(['prefix' => 'v1/users'], function ($router) {
+    $router->group(['prefix' => 'v1/users'], function ($router) {
         $router->get('/list', [UserController::class, 'index']);
         $router->post('/store', [UserController::class, 'store']);
         $router->post('/update/{id}', [UserController::class, 'update']);
         $router->delete('/delete/{id}', [UserController::class, 'destroy']);
     });
-    Route::group(['prefix' => 'v1/room'], function ($router) {
+    $router->group(['prefix' => 'v1/room'], function ($router) {
         $router->get('/', [MasterRoomController::class, 'index']);
         $router->post('/store', [MasterRoomController::class, 'store']);
         $router->get('/detail/{id}', [MasterRoomController::class, 'detail']);
@@ -38,7 +39,7 @@ Route::group(['middleware' => 'api'], function ($router) {
         $router->delete('/delete/{id}', [MasterRoomController::class, 'destroy']);
         $router->get('/qrcode/{id}', [MasterRoomController::class, 'createQrcode']);
     });
-    Route::group(['prefix' => 'v1/rent'], function ($router) {
+    $router->group(['prefix' => 'v1/rent'], function ($router) {
         $router->get('/', [RentController::class, 'index']);
         $router->get('/calendar', [RentController::class, 'listCalendar']);
         $router->get('/list-person-responsible', [RentController::class, 'listPersonResponsible']);
