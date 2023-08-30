@@ -147,7 +147,7 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'username' => 'required|string',
                 'email' => 'required|unique:users,email,' . $check_user->id,
-                'password' => 'required|numeric',
+                'password' => 'numeric',
                 'nik' => 'required|unique:user_details,nik,' . $user_detail_id,
                 'name' => 'required|string',
                 'phone_number' => 'required|string',
@@ -156,7 +156,6 @@ class UserController extends Controller
                 'username.required' => 'Please input username.',
                 'email.required' => 'Please input email.',
                 'email.unique' => 'Email already taken.',
-                'password.required' => 'Please input password.',
                 'password.numeric' => 'Password must be numeric.',
                 'nik.required' => 'Please input nik.',
                 'nik.unique' => 'Nik already taken.',

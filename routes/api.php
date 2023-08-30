@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\MasterRoomController;
 use App\Http\Controllers\Api\RentController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\GuestController;
+use App\Http\Controllers\Api\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'v1/auth'], function ($router) {
@@ -47,5 +48,10 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/detail/{id}', [RentController::class, 'detail']);
         $router->post('/update/{id}', [RentController::class, 'update']);
         $router->delete('/delete/{id}', [RentController::class, 'destroy']);
+    });
+    $router->group(['prefix' => 'v1/report'], function ($router) {
+        $router->post('/store-bulk-image/{rent_id}', [ReportController::class, 'storeBulkImage']);
+        $router->get('/list-rent', [ReportController::class, 'listReportRent']);
+        $router->get('/detail/rent/{id}', [ReportController::class, 'detailReportRent']);
     });
 });
