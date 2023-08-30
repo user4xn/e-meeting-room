@@ -66,7 +66,8 @@ class RentController extends Controller
     public function listCalendar()
     {
         try{
-            $fetch = Rent::get()
+            $fetch = Rent::whereIn('status', ['approved', 'unapproved'])
+                ->get()
                 ->toArray();
 
             $i = 0;
