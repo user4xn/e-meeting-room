@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Rent extends Model
 {
     use HasFactory;
+
+    public function Room()
+    {
+        return $this->hasOne(MasterRoom::class, 'id');
+    }
     
     public function getCreatedAtAttribute($value)
     {

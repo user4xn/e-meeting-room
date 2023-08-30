@@ -9,6 +9,7 @@ use App\Models\MasterRoom;
 use App\Models\Rent;
 use App\Models\User;
 use Carbon\Carbon;
+use DateTime;
 use DB;
 use Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -35,7 +36,6 @@ class RentController extends Controller
                 $qrcode = QrCode::size(300)->generate($dataString);
                 $svgPath = $folderPath . '/qrcode_' . $name_file . '.svg';
                 file_put_contents($svgPath, $qrcode);
-
                 return [
                     'id' => $new['id'],
                     'user_id' => $new['user_id'],
@@ -70,14 +70,18 @@ class RentController extends Controller
 
             $i = 0;
             $reform = array_map(function($new) use (&$i) { 
+                $startTime = new DateTime('2023-08-28 20:00:00');
+                $endTime = new DateTime('2023-08-28 21:00:00');
+
+                $interval = $startTime->diff($endTime);
                 $i++;
                 return [
                     'id' => $new['id'],
                     'url' => '',
                     'title' => $new['event_name'],
-                    'start' => $new['date_start'],
-                    'end' => $new['date_end'],
-                    'allDay' => false,
+                    'start' => $new['date_start'].' '.$new['time_start'],
+                    'end' => $new['date_end'].' '.$new['time_end'],
+                    'allDay' => ($interval->format('%h jam') >= 24) ? true : false,
                     'extendedProps' => array(
                         'calendar' => $new['organization']
                     )
@@ -172,6 +176,7 @@ class RentController extends Controller
     {
         try{
             $rent = Rent::where('id', $id)
+                ->with('Room')
                 ->first();
             if(!$rent){
                 return ResponseJson::response('failed', 'Rent Not Found.', 404, null); 
