@@ -66,8 +66,7 @@ class RentController extends Controller
     public function listCalendar()
     {
         try{
-            $fetch = Rent::where('status', 'approved')
-                ->get()
+            $fetch = Rent::get()
                 ->toArray();
 
             $i = 0;
@@ -85,7 +84,7 @@ class RentController extends Controller
                     'end' => $new['date_end'].' '.$new['time_end'],
                     'allDay' => ($interval->format('%h jam') >= 24) ? true : false,
                     'extendedProps' => array(
-                        'calendar' => $new['organization']
+                        'calendar' => ($new['status'] == "approved") ? $new['organization'] : "unapproved"
                     )
                 ]; 
             }, $fetch);
