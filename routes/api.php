@@ -34,6 +34,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     });
     $router->group(['prefix' => 'v1/room'], function ($router) {
         $router->get('/', [MasterRoomController::class, 'index']);
+        $router->get('/select-option', [MasterRoomController::class, 'selectOptionRoom']);
         $router->post('/store', [MasterRoomController::class, 'store']);
         $router->get('/detail/{id}', [MasterRoomController::class, 'detail']);
         $router->post('/update/{id}', [MasterRoomController::class, 'update']);

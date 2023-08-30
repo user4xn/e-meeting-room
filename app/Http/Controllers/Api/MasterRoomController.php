@@ -164,6 +164,19 @@ class MasterRoomController extends Controller
         }
     }
 
+    public function selectOptionRoom()
+    {
+        $check_user = Auth::user();
+        if($check_user->role != "Admin"){
+            return ResponseJson::response('failed', 'You not have access!', 403, null); 
+        }
+        $fetch = MasterRoom::select('id', 'room_name')
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->toArray();
+        return ResponseJson::response('success', 'Success Get Select Option Master Room.', 200, $fetch); 
+    }
+
     public function createQrcode($room_id)
     {
         $check_room = MasterRoom::where('id', $room_id)
