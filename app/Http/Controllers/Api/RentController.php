@@ -78,9 +78,9 @@ class RentController extends Controller
                     'start' => $new['date_start'],
                     'end' => $new['date_end'],
                     'allDay' => false,
-                    'extendedProps' => array([
+                    'extendedProps' => array(
                         'calendar' => $new['organization']
-                    ])
+                    )
                 ]; 
             }, $fetch);
             return ResponseJson::response('success', 'Success Get List Calendar.', 200, ['events' => $reform]); 
