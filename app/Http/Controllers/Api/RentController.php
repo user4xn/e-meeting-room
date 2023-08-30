@@ -85,7 +85,7 @@ class RentController extends Controller
                     'end' => $new['date_end'].' '.$new['time_end'],
                     'allDay' => ($interval->format('%h jam') >= 24) ? true : false,
                     'extendedProps' => array(
-                        'calendar' => ($new['status'] == "approved") ? $new['organization'] : "unapproved"
+                        'calendar' => ($new['status'] == "approved") ? $new['organization'] : "Unapproved"
                     )
                 ]; 
             }, $fetch);
