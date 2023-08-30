@@ -66,12 +66,14 @@ class RentController extends Controller
     public function listCalendar()
     {
         try{
-            $fetch = Rent::get()->toArray();
+            $fetch = Rent::where('status', 'approved')
+                ->get()
+                ->toArray();
 
             $i = 0;
             $reform = array_map(function($new) use (&$i) { 
-                $startTime = new DateTime('2023-08-28 20:00:00');
-                $endTime = new DateTime('2023-08-28 21:00:00');
+                $startTime = new DateTime($new['date_start'].' '.$new['time_start']);
+                $endTime = new DateTime($new['date_end'].' '.$new['time_end']);
 
                 $interval = $startTime->diff($endTime);
                 $i++;

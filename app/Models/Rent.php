@@ -11,7 +11,7 @@ class Rent extends Model
 
     public function Room()
     {
-        return $this->hasOne(MasterRoom::class, 'id');
+        return $this->hasOne('App\Models\MasterRoom', 'id', 'room_id');
     }
     
     public function getCreatedAtAttribute($value)
