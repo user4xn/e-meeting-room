@@ -49,7 +49,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/detail/{id}', [RentController::class, 'detail']);
         $router->post('/update/{id}', [RentController::class, 'update']);
         $router->post('/update/status/{id}', [RentController::class, 'updateStatus']);
-        $router->delete('/delete/{id}', [RentController::class, 'destroy']);
+        $router->delete('/delete/{rent_id}', [RentController::class, 'delete']);
     });
     $router->group(['prefix' => 'v1/report'], function ($router) {
         $router->post('/store-bulk-image/{rent_id}', [ReportController::class, 'storeBulkImage']);

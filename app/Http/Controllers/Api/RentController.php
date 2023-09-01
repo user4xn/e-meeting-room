@@ -115,25 +115,23 @@ class RentController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',
             'room_id' => 'required|string',
-            'date_start' => 'required',
-            'date_end' => 'required',
-            'time_start' => 'required',
-            'time_end' => 'required',
+            'datetime_start' => 'required',
+            'datetime_end' => 'required',
             'event_name' => 'required',
             'event_desc' => 'required',
             'guest_count' => 'required',
             'organization' => 'required',
+            'is_all_day' => 'required',
         ],[
             'user_id' => 'Please Input Request user_id.', 
             'room_id' => 'Please Input Request room_id.',
-            'date_start' => 'Please Input Request date_start.',
-            'date_end' => 'Please Input Request date_end.',
-            'time_start' => 'Please Input Request time_start.',
-            'time_end' => 'Please Input Request time_end.',
+            'datetime_start' => 'Please Input Request date_start.',
+            'datetime_end' => 'Please Input Request datetime_end.',
             'event_name' => 'Please Input Request event_name.',
             'event_desc' => 'Please Input Request event_desc.',
             'guest_count' => 'Please Input Request guest_count.',
             'organization' => 'Please Input Request organization.',
+            'is_all_day' => 'Please Input Request is_all_day.',
         ]);
         if ($validator->fails()) {
             return ResponseJson::response('failed', 'Error Validation', 422, ['error' => $validator->errors()]);
@@ -150,19 +148,25 @@ class RentController extends Controller
         if(!$check_room){
             return ResponseJson::response('failed', 'Please Check Master Room', 400, null);
         }
+
+        $date_start = Carbon::parse($request->datetime_start)->format('Y-m-d');
+        $date_end = Carbon::parse($request->datetime_end)->format('Y-m-d');
+        $time_start = Carbon::parse($request->datetime_start)->format('H:i:s');
+        $time_end = Carbon::parse($request->datetime_end)->format('H:i:s');
         DB::beginTransaction();
         try{
             $store_rent = new Rent();
             $store_rent->user_id = $request->user_id;
             $store_rent->room_id = $request->room_id;
-            $store_rent->date_start = $request->date_start;
-            $store_rent->date_end = $request->date_end;
-            $store_rent->time_start = $request->time_start;
-            $store_rent->time_end = $request->time_end;
+            $store_rent->date_start = $date_start;
+            $store_rent->date_end = $date_end;
+            $store_rent->time_start = $time_start;
+            $store_rent->time_end = $time_end;
             $store_rent->event_name = $request->event_name;
             $store_rent->event_desc = $request->event_desc;
             $store_rent->guest_count = $request->guest_count;
             $store_rent->organization = $request->organization;
+            $store_rent->is_all_day = $request->is_all_day;
             $store_rent->save();
 
             DB::commit();
@@ -204,16 +208,32 @@ class RentController extends Controller
         
         try {
 
+            $date_start = "";
+            $time_start = "";
+            $date_end = "";
+            $time_end = "";
+            if($request->datetime_start){
+                $date_start = Carbon::parse($request->datetime_start)->format('Y-m-d');
+                $time_start = Carbon::parse($request->datetime_start)->format('H:i:s');
+            }
+
+            if($request->datetime_end){
+                $date_end = Carbon::parse($request->datetime_end)->format('Y-m-d');
+                $time_end = Carbon::parse($request->datetime_end)->format('H:i:s');
+            }
+
+            $rent->user_id = $request->user_id ?? $rent->user_id;
             $rent->room_id = $request->room_id ?? $rent->room_id;
-            $rent->date_start = $request->date_start ?? $rent->date_start;
-            $rent->date_end = $request->date_end ?? $rent->date_end;
-            $rent->time_start = $request->time_start ?? $rent->time_start;
-            $rent->time_end = $request->time_end ?? $rent->time_end;
+            $rent->date_start = $date_start ?? $rent->date_start;
+            $rent->date_end = $date_end ?? $rent->date_end;
+            $rent->time_start = $time_start ?? $rent->time_start;
+            $rent->time_end = $time_end ?? $rent->time_end;
             $rent->event_name = $request->event_name ?? $rent->event_name;
             $rent->event_desc = $request->event_desc ?? $rent->event_desc;
             $rent->guest_count = $request->guest_count ?? $rent->guest_count;
             $rent->organization = $request->organization ?? $rent->organization;
-            
+            $rent->is_all_day = $request->is_all_day ?? $rent->is_all_day;
+
             $rent->save();
 
             DB::commit();
@@ -288,5 +308,16 @@ class RentController extends Controller
         }catch(\Exception $e){
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
+    }
+
+    public function delete($rent_id)
+    {
+        $rent = Rent::where('id', $rent_id)
+            ->first();
+        if (!$rent) {
+            return ResponseJson::response('failed', 'Rent Not Found.', 404, null);
+        }
+        $rent->delete();
+        return ResponseJson::response('success', 'Success Delete Rent.', 200, null);
     }
 }
