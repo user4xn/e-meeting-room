@@ -48,6 +48,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->post('/store', [RentController::class, 'store']);
         $router->get('/detail/{id}', [RentController::class, 'detail']);
         $router->post('/update/{id}', [RentController::class, 'update']);
+        $router->post('/update/status/{id}', [RentController::class, 'updateStatus']);
         $router->delete('/delete/{id}', [RentController::class, 'destroy']);
     });
     $router->group(['prefix' => 'v1/report'], function ($router) {

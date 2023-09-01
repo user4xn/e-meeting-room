@@ -192,6 +192,40 @@ class RentController extends Controller
 
     public function update(Request $request, $id)
     {
+
+        
+        $rent = Rent::where('id', $id)->where('status', 'unapproved')->first();
+        
+        if (!$rent) {
+            return ResponseJson::response('failed', 'Rent Not Found.', 404, null);
+        }
+        
+        DB::beginTransaction();
+        
+        try {
+
+            $rent->room_id = $request->room_id ?? $rent->room_id;
+            $rent->date_start = $request->date_start ?? $rent->date_start;
+            $rent->date_end = $request->date_end ?? $rent->date_end;
+            $rent->time_start = $request->time_start ?? $rent->time_start;
+            $rent->time_end = $request->time_end ?? $rent->time_end;
+            $rent->event_name = $request->event_name ?? $rent->event_name;
+            $rent->event_desc = $request->event_desc ?? $rent->event_desc;
+            $rent->guest_count = $request->guest_count ?? $rent->guest_count;
+            $rent->organization = $request->organization ?? $rent->organization;
+            
+            $rent->save();
+
+            DB::commit();
+            return ResponseJson::response('success', 'Success Update Status Rent.', 200, null);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
+        }
+    }
+    
+    public function updateStatus(Request $request, $id)
+    {
        
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:approved,rejected',
