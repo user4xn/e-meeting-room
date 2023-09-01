@@ -83,7 +83,7 @@ class RentController extends Controller
                     'title' => $new['event_name'],
                     'start' => $new['date_start'].' '.$new['time_start'],
                     'end' => $new['date_end'].' '.$new['time_end'],
-                    'allDay' => ($interval->format('%h jam') >= 24) ? true : false,
+                    'allDay' => $new['is_all_day'] == 1 ? true : false,
                     'extendedProps' => array(
                         'calendar' => ($new['status'] == "approved") ? $new['organization'] : "Unapproved"
                     )
@@ -153,6 +153,13 @@ class RentController extends Controller
         $date_end = Carbon::parse($request->datetime_end)->format('Y-m-d');
         $time_start = Carbon::parse($request->datetime_start)->format('H:i:s');
         $time_end = Carbon::parse($request->datetime_end)->format('H:i:s');
+
+        $startTime = Carbon::parse($request->datetime_start);
+        $endTime = Carbon::parse($request->datetime_end);
+
+        $interval = $startTime->diff($endTime);
+        $totalHours = $interval->h + ($interval->days * 24);
+
         DB::beginTransaction();
         try{
             $store_rent = new Rent();
@@ -166,7 +173,7 @@ class RentController extends Controller
             $store_rent->event_desc = $request->event_desc;
             $store_rent->guest_count = $request->guest_count;
             $store_rent->organization = $request->organization;
-            $store_rent->is_all_day = $request->is_all_day;
+            $store_rent->is_all_day = ($request->is_all_day == 1 && $totalHours >= 24 || $totalHours >= 24) ? 1 : 0;
             $store_rent->save();
 
             DB::commit();
@@ -212,6 +219,7 @@ class RentController extends Controller
             $time_start = "";
             $date_end = "";
             $time_end = "";
+            $totalHours = 0;
             if($request->datetime_start){
                 $date_start = Carbon::parse($request->datetime_start)->format('Y-m-d');
                 $time_start = Carbon::parse($request->datetime_start)->format('H:i:s');
@@ -220,6 +228,14 @@ class RentController extends Controller
             if($request->datetime_end){
                 $date_end = Carbon::parse($request->datetime_end)->format('Y-m-d');
                 $time_end = Carbon::parse($request->datetime_end)->format('H:i:s');
+            }
+
+            if($request->datetime_start && $request->datetime_end){
+                $startTime = new DateTime($request->datetime_start);
+                $endTime = new DateTime($request->datetime_end);
+
+                $interval = $startTime->diff($endTime);
+                $totalHours = $interval->h + ($interval->days * 24);
             }
 
             $rent->user_id = $request->user_id ?? $rent->user_id;
@@ -232,7 +248,7 @@ class RentController extends Controller
             $rent->event_desc = $request->event_desc ?? $rent->event_desc;
             $rent->guest_count = $request->guest_count ?? $rent->guest_count;
             $rent->organization = $request->organization ?? $rent->organization;
-            $rent->is_all_day = $request->is_all_day ?? $rent->is_all_day;
+            $rent->is_all_day = $totalHours >= 24 ? 1 : $rent->is_all_day;
 
             $rent->save();
 
