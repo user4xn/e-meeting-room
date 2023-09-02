@@ -34,7 +34,6 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     });
     $router->group(['prefix' => 'v1/room'], function ($router) {
         $router->get('/', [MasterRoomController::class, 'index']);
-        $router->get('/select-option', [MasterRoomController::class, 'selectOptionRoom']);
         $router->post('/store', [MasterRoomController::class, 'store']);
         $router->get('/detail/{id}', [MasterRoomController::class, 'detail']);
         $router->post('/update/{id}', [MasterRoomController::class, 'update']);
@@ -45,6 +44,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/', [RentController::class, 'index']);
         $router->get('/calendar', [RentController::class, 'listCalendar']);
         $router->get('/list-person-responsible', [RentController::class, 'listPersonResponsible']);
+        $router->get('/list-master-room', [RentController::class, 'selectOptionRoom']);
         $router->post('/store', [RentController::class, 'store']);
         $router->get('/detail/{id}', [RentController::class, 'detail']);
         $router->post('/update/{id}', [RentController::class, 'update']);

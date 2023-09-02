@@ -74,7 +74,7 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'username' => 'required|string',
                 'email' => 'required|unique:users,email',
-                'password' => 'required|string',
+                'password' => 'required',
                 'nik' => 'required|unique:user_details,nik',
                 'name' => 'required|string',
                 'phone_number' => 'required|string',
@@ -84,7 +84,6 @@ class UserController extends Controller
                 'email.required' => 'Please input email.',
                 'email.unique' => 'Email already taken.',
                 'password.required' => 'Please input password.',
-                'password.numeric' => 'Password must be numeric.',
                 'nik.required' => 'Please input nik.',
                 'nik.unique' => 'Nik already taken.',
                 'name.required' => 'Please input name.',
@@ -147,7 +146,6 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'username' => 'required|string',
                 'email' => 'required|unique:users,email,' . $check_user->id,
-                'password' => 'numeric',
                 'nik' => 'required|unique:user_details,nik,' . $user_detail_id,
                 'name' => 'required|string',
                 'phone_number' => 'required|string',
@@ -156,7 +154,6 @@ class UserController extends Controller
                 'username.required' => 'Please input username.',
                 'email.required' => 'Please input email.',
                 'email.unique' => 'Email already taken.',
-                'password.numeric' => 'Password must be numeric.',
                 'nik.required' => 'Please input nik.',
                 'nik.unique' => 'Nik already taken.',
                 'name.required' => 'Please input name.',
@@ -169,7 +166,9 @@ class UserController extends Controller
 
             $check_user->username = $request->username;
             $check_user->email = $request->email;
-            $check_user->password = bcrypt($request->password);
+            if($request->password){
+                $check_user->password = bcrypt($request->password);
+            }
             $check_user->role = "User";
             $check_user->save();
 

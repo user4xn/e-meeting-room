@@ -11,6 +11,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use DateTime;
 use DB;
+use Illuminate\Support\Facades\Auth;
 use Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class RentController extends Controller
@@ -18,9 +19,20 @@ class RentController extends Controller
     public function index(Request $request)
     {
         try {
-            $fetch = Rent::when($request->status, function ($query) use ($request) {
-                return $query->where('status', $request->status);
-            })->get()->toArray();
+            if(Auth::user()->role != "Admin"){
+                $fetch = Rent::when($request->status, function ($query) use ($request) {
+                    return $query->where('status', $request->status);
+                })
+                ->where('user_id', Auth::user()->id)
+                ->get()
+                ->toArray();
+            }else{
+                $fetch = Rent::when($request->status, function ($query) use ($request) {
+                    return $query->where('status', $request->status);
+                }
+                )->get()
+                ->toArray();
+            }
             $folderPath = public_path('qrcodes');
             if (!file_exists($folderPath)) {
                 mkdir($folderPath, 0777, true);
@@ -188,9 +200,17 @@ class RentController extends Controller
     public function detail($id)
     {
         try{
-            $rent = Rent::where('id', $id)
-                ->with('Room')
-                ->first();
+            if(Auth::user()->role != "Admin"){
+                $user_id = Auth::user()->id;
+                $rent = Rent::where('id', $id)
+                    ->where('user_id', $user_id)
+                    ->with('Room')
+                    ->first();
+            }else{
+                $rent = Rent::where('id', $id)
+                    ->with('Room')
+                    ->first();
+            }
             if(!$rent){
                 return ResponseJson::response('failed', 'Rent Not Found.', 404, null); 
             }
@@ -204,8 +224,17 @@ class RentController extends Controller
     public function update(Request $request, $id)
     {
 
-        
-        $rent = Rent::where('id', $id)->where('status', 'unapproved')->first();
+        if(Auth::user()->role != "Admin"){
+            $user_id = Auth::user()->id;
+            $rent = Rent::where('id', $id)
+                ->where('user_id', $user_id)
+                ->where('status', 'unapproved')
+                ->first();
+        }else{
+            $rent = Rent::where('id', $id)
+                ->where('status', 'unapproved')
+                ->first();
+        }
         
         if (!$rent) {
             return ResponseJson::response('failed', 'Rent Not Found.', 404, null);
@@ -262,7 +291,7 @@ class RentController extends Controller
     
     public function updateStatus(Request $request, $id)
     {
-       
+        $user_id = Auth::user()->id;
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:approved,rejected',
         ], [
@@ -274,7 +303,10 @@ class RentController extends Controller
             return ResponseJson::response('failed', 'Error Validation', 422, ['error' => $validator->errors()]);
         }
         
-        $rent = Rent::where('id', $id)->where('status', 'unapproved')->first();
+        $rent = Rent::where('id', $id)
+            ->where('status', 'unapproved')
+            ->where('user_id', $user_id)
+            ->first();
         
         if (!$rent) {
             return ResponseJson::response('failed', 'Rent Not Found.', 404, null);
@@ -335,5 +367,18 @@ class RentController extends Controller
         }
         $rent->delete();
         return ResponseJson::response('success', 'Success Delete Rent.', 200, null);
+    }
+
+    public function selectOptionRoom()
+    {
+        $check_user = Auth::user();
+        if($check_user->role != "Admin"){
+            return ResponseJson::response('failed', 'You not have access!', 403, null); 
+        }
+        $fetch = MasterRoom::select('id', 'room_name')
+            ->orderBy('created_at', 'DESC')
+            ->get()
+            ->toArray();
+        return ResponseJson::response('success', 'Success Get Select Option Master Room.', 200, $fetch); 
     }
 }
