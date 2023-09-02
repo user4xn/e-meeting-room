@@ -13,9 +13,6 @@ use Auth;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class MasterRoomController extends Controller
 {
-    public function __construct() {
-        $this->middleware('auth:api');
-    }
     public function index()
     {
         try{
