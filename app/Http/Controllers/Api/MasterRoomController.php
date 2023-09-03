@@ -11,6 +11,7 @@ use Validator;
 use DB;
 use Auth;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Response;
 class MasterRoomController extends Controller
 {
     public function index()
@@ -25,12 +26,16 @@ class MasterRoomController extends Controller
                 ->toArray();
             $i = 0;
             $reform = array_map(function($new) use (&$i) { 
+               
                 $data = [
                     'room_id' => $new['id']
                 ];
-                
-                $qrCode = QrCode::size(300)->generate(json_encode($data));
-                $base64 = 'data:image/png;base64,' . base64_encode($qrCode);
+            
+                $jsonData = json_encode($data);
+            
+                $qrCode = QrCode::format('png')->size(300)->generate($jsonData);
+
+                $base64Image = 'data:image/png;base64,' . base64_encode($qrCode);
                 $i++;
                 return [
                     'no' => $i.'.',
@@ -38,7 +43,7 @@ class MasterRoomController extends Controller
                     'room_name' => $new['room_name'],
                     'room_desc' => $new['room_desc'],
                     'room_capacity' => $new['room_capacity'],
-                    'qrcode' => $base64,
+                    'qrcode' => $base64Image,
                     'created_at' => $new['created_at'],
                 ]; 
             }, $fetch);
