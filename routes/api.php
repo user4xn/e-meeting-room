@@ -55,6 +55,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->group(['prefix' => 'v1/report'], function ($router) {
         $router->post('/store-bulk-image/{rent_id}', [ReportController::class, 'storeBulkImage']);
         $router->get('/list-rent', [ReportController::class, 'listReportRent']);
+        $router->get('/list-rent/pdf', [ReportController::class, 'listReportRentPdf']);
         $router->get('/detail/rent/{id}', [ReportController::class, 'detailReportRent']);
     });
 });

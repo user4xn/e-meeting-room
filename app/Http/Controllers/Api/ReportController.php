@@ -8,7 +8,8 @@ use Illuminate\Http\Request;
 use App\Helpers\ResponseJson;
 use App\Models\Guest;
 use App\Models\ReportImageRent;
-
+use PDF;
+use Carbon\Carbon;
 class ReportController extends Controller
 {
     public function storeBulkImage(Request $request, $rent_id)
@@ -93,10 +94,36 @@ class ReportController extends Controller
         }
     }
 
-    public function exportFilePdf(Request $request, $rent_id)
+    public function listReportRentPdf()
     {
         try{
+            $fetch = Rent::get()->toArray();
 
+            $i = 0;
+            $reform = array_map(function($new) use (&$i) { 
+                $i++;
+                $check_file = ReportImageRent::where('rent_id', $new['id'])
+                    ->select('id')
+                    ->first();
+                $total_guest = Guest::where('rent_id', $new['id'])
+                    ->count();
+                return [
+                    'no' => $i,
+                    'event_name' => $new['event_name'],
+                    'have_files' => $check_file ? true : false,
+                    'date_start' => $new['date_start'],
+                    'date_end' => $new['date_end'],
+                    'time_start' => Carbon::parse($new['time_start'])->format('H:i'),
+                    'time_end' => Carbon::parse($new['time_end'])->format('H:i'),
+                    'total_guest' => $total_guest,
+                    'status' => $new['status']
+                ]; 
+            }, $fetch);
+            $data = array(
+                'list_rents' => $reform
+            );
+            $pdf = PDF::loadView('pdf.report_rent_list', $data);
+            return $pdf->stream();
         }catch(\Exception $e){
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
         }

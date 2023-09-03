@@ -13,9 +13,13 @@ class Kernel extends ConsoleKernel
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
+    protected $commands = [
+        Commands\RentExpired::class,
+    ];
     protected function schedule(Schedule $schedule)
     {
-        $schedule->call('\App\Http\Controllers\UtilsController@notifyPassword')->daily();
+            $schedule->command('rentexpired:cron')
+                ->everyMinute();
     }
 
     /**

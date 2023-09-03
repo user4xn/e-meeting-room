@@ -52,8 +52,8 @@ class RentController extends Controller
                     'id' => $new['id'],
                     'user_id' => $new['user_id'],
                     'room_id' => $new['room_id'],
-                    'date_start' => $new['date_start'],
-                    'date_end' => $new['date_end'],
+                    'date_start' => $new['date_start'].' '.$new['time_start'],
+                    'date_end' => $new['date_end'].' '.$new['time_end'],
                     'time_start' => $new['time_start'],
                     'time_end' => $new['time_end'],
                     'event_name' => $new['event_name'],
@@ -387,4 +387,5 @@ class RentController extends Controller
             ->toArray();
         return ResponseJson::response('success', 'Success Get Select Option Master Room.', 200, $fetch); 
     }
+
 }
