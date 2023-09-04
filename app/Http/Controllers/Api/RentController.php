@@ -209,13 +209,13 @@ class RentController extends Controller
         try{
             if(Auth::user()->role != "Admin"){
                 $user_id = Auth::user()->id;
-                $rent = Rent::where('id', $id)
+                $rent = Rent::where('rents.id', $id)
                     ->where('user_id', $user_id)
                     ->select('ud.name as user_name', 'ud.phone_number as user_phone', 'rents.*')
                     ->with('Room')
                     ->first();
             }else{
-                $rent = Rent::where('id', $id)
+                $rent = Rent::where('rents.id', $id)
                     ->leftjoin('user_details as ud', 'ud.user_id', '=', 'rents.user_id')
                     ->select('ud.name as user_name', 'ud.phone_number as user_phone', 'rents.*')
                     ->with('Room')
