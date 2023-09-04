@@ -75,7 +75,7 @@ class UserController extends Controller
                 'username' => 'required|string',
                 'email' => 'required|unique:users,email',
                 'password' => 'required',
-                'nik' => 'required|unique:user_details,nik',
+                'nip' => 'required|unique:user_details,nip',
                 'name' => 'required|string',
                 'phone_number' => 'required|string',
                 'address' => 'required|string'
@@ -84,8 +84,8 @@ class UserController extends Controller
                 'email.required' => 'Please input email.',
                 'email.unique' => 'Email already taken.',
                 'password.required' => 'Please input password.',
-                'nik.required' => 'Please input nik.',
-                'nik.unique' => 'Nik already taken.',
+                'nip.required' => 'Please input nip.',
+                'nip.unique' => 'nip already taken.',
                 'name.required' => 'Please input name.',
                 'phone_number.required' => 'Please input phone number.',
                 'address.required' => 'Please input address.',
@@ -104,7 +104,7 @@ class UserController extends Controller
 
             $store_user_detail = new UserDetail();
             $store_user_detail->user_id = $store_user->id;
-            $store_user_detail->nik = $request->nik;
+            $store_user_detail->nip = $request->nip;
             $store_user_detail->name = $request->name;
             $store_user_detail->phone_number = $request->phone_number;
             $store_user_detail->address = $request->address;
@@ -146,7 +146,7 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'username' => 'required|string',
                 'email' => 'required|unique:users,email,' . $check_user->id,
-                'nik' => 'required|unique:user_details,nik,' . $user_detail_id,
+                'nip' => 'required|unique:user_details,nip,' . $user_detail_id,
                 'name' => 'required|string',
                 'phone_number' => 'required|string',
                 'address' => 'required|string'
@@ -154,8 +154,8 @@ class UserController extends Controller
                 'username.required' => 'Please input username.',
                 'email.required' => 'Please input email.',
                 'email.unique' => 'Email already taken.',
-                'nik.required' => 'Please input nik.',
-                'nik.unique' => 'Nik already taken.',
+                'nip.required' => 'Please input nip.',
+                'nip.unique' => 'nip already taken.',
                 'name.required' => 'Please input name.',
                 'phone_number.required' => 'Please input phone number.',
                 'address.required' => 'Please input address.',
@@ -173,7 +173,7 @@ class UserController extends Controller
             $check_user->save();
 
             if($check_user_detail){
-                $check_user_detail->nik = $request->nik;
+                $check_user_detail->nip = $request->nip;
                 $check_user_detail->name = $request->name;
                 $check_user_detail->phone_number = $request->phone_number;
                 $check_user_detail->address = $request->address;
@@ -181,7 +181,7 @@ class UserController extends Controller
             }else{
                 $check_user_detail = new UserDetail();
                 $check_user_detail->user_id = $id;
-                $check_user_detail->nik = $request->nik;
+                $check_user_detail->nip = $request->nip;
                 $check_user_detail->name = $request->name;
                 $check_user_detail->phone_number = $request->phone_number;
                 $check_user_detail->address = $request->address;

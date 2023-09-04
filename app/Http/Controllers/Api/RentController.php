@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseJson;
+use App\Models\LogRent;
 use App\Models\MasterRoom;
 use App\Models\Rent;
 use App\Models\User;
@@ -23,14 +24,27 @@ class RentController extends Controller
                 $fetch = Rent::when($request->status, function ($query) use ($request) {
                     return $query->where('status', $request->status);
                 })
+                ->when($request->search, function ($query) use ($request) {
+                    return $query->where('event_name', 'LIKE','%'.$request->search.'%');
+                })
                 ->where('user_id', Auth::user()->id)
                 ->get()
                 ->toArray();
             }else{
                 $fetch = Rent::when($request->status, function ($query) use ($request) {
                     return $query->where('status', $request->status);
-                }
-                )->get()
+                })
+                ->when($request->search, function ($query) use ($request) {
+                    return $query->where('event_name', 'LIKE','%'.$request->search.'%');
+                })
+                ->when($request->start_date && $request->end_date, function ($query) use ($request) {
+                    return $query->whereDate('date_start', '>=',$request->start_date)
+                        ->whereDate('date_end', '<=',$request->end_date);
+                })
+                ->leftjoin('user_details as ud', 'ud.user_id', '=', 'rents.user_id')
+                ->leftjoin('user_details as vud', 'vud.user_id', '=', 'rents.verificator_user_id')
+                ->select('ud.name as user_name', 'ud.phone_number as user_phone', 'vud.name as verificator_name', 'vud.phone_number as verificator_phone','rents.*')
+                ->get()
                 ->toArray();
             }
             $folderPath = public_path('qrcodes');
@@ -63,6 +77,10 @@ class RentController extends Controller
                     'status' => $new['status'],
                     'notes' => $new['notes'],
                     'qrcode' => asset('qrcodes/qrcode_'.$name_file.'.svg'),
+                    'user_name' => $new['user_name'],
+                    'user_phone' => $new['user_phone'],
+                    'verificator_name' => $new['verificator_name'],
+                    'verificator_phone' => $new['verificator_phone'],
                     'created_at' => $new['created_at'],
                     'updated_at' => $new['updated_at'],
                 ];
@@ -78,16 +96,12 @@ class RentController extends Controller
     public function listCalendar()
     {
         try{
-            $fetch = Rent::whereIn('status', ['approved', 'unapproved'])
+            $fetch = Rent::whereIn('status', ['approved', 'unapproved', 'expired'])
                 ->get()
                 ->toArray();
 
             $i = 0;
             $reform = array_map(function($new) use (&$i) { 
-                $startTime = new DateTime($new['date_start'].' '.$new['time_start']);
-                $endTime = new DateTime($new['date_end'].' '.$new['time_end']);
-
-                $interval = $startTime->diff($endTime);
                 $i++;
                 return [
                     'id' => $new['id'],
@@ -97,7 +111,7 @@ class RentController extends Controller
                     'end' => $new['date_end'].' '.$new['time_end'],
                     'allDay' => $new['is_all_day'] == 1 ? true : false,
                     'extendedProps' => array(
-                        'calendar' => ($new['status'] == "approved") ? $new['organization'] : "Unapproved"
+                        'calendar' => ($new['status'] == "approved") ? $new['organization'] : ucwords($new['status'])
                     )
                 ]; 
             }, $fetch);
@@ -291,7 +305,6 @@ class RentController extends Controller
     
     public function updateStatus(Request $request, $id)
     {
-        $user_id = Auth::user()->id;
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:approved,rejected',
         ], [
@@ -302,10 +315,9 @@ class RentController extends Controller
         if ($validator->fails()) {
             return ResponseJson::response('failed', 'Error Validation', 422, ['error' => $validator->errors()]);
         }
-        
+
         $rent = Rent::where('id', $id)
             ->where('status', 'unapproved')
-            ->where('user_id', $user_id)
             ->first();
         
         if (!$rent) {
@@ -330,6 +342,8 @@ class RentController extends Controller
         
                 $rent->notes = $request->notes;
             }
+
+            $rent->verificator_user_id = Auth::user()->id;
             
             $rent->save();
             DB::commit();
@@ -377,10 +391,6 @@ class RentController extends Controller
 
     public function selectOptionRoom()
     {
-        // $check_user = Auth::user();
-        // if($check_user->role != "Admin"){
-        //     return ResponseJson::response('failed', 'You not have access!', 403, null); 
-        // }
         $fetch = MasterRoom::select('id', 'room_name')
             ->orderBy('created_at', 'DESC')
             ->get()
