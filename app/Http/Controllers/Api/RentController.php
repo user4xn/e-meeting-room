@@ -211,10 +211,13 @@ class RentController extends Controller
                 $user_id = Auth::user()->id;
                 $rent = Rent::where('id', $id)
                     ->where('user_id', $user_id)
+                    ->select('ud.name as user_name', 'ud.phone_number as user_phone', 'rents.*')
                     ->with('Room')
                     ->first();
             }else{
                 $rent = Rent::where('id', $id)
+                    ->leftjoin('user_details as ud', 'ud.user_id', '=', 'rents.user_id')
+                    ->select('ud.name as user_name', 'ud.phone_number as user_phone', 'rents.*')
                     ->with('Room')
                     ->first();
             }
