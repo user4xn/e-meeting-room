@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\MasterRoomController;
 use App\Http\Controllers\Api\RentController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\GuestController;
+use App\Http\Controllers\Api\LandingpageController;
 use App\Http\Controllers\Api\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,10 @@ Route::group(['prefix' => 'v1/auth'], function ($router) {
 });
 Route::group(['prefix' => 'v1/guest'], function ($router) {
     $router->post('/store', [GuestController::class, 'store'])->name('guest.store');
+});
+Route::group(['prefix' => 'v1/public'], function ($router) {
+    $router->get('/list/room', [LandingpageController::class, 'listRoom'])->name('landingpage.list.room');
+    $router->get('/list/event/{room_id}', [LandingpageController::class, 'listCurrentRent'])->name('landingpage.current.event');
 });
 $router->get('/v1/list/current-meeting/{room_id}', [RentController::class, 'currentMeeting'])->name('list_current_meeting');
 Route::group(['middleware' => 'auth:api'], function ($router) {
