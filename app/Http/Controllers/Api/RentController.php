@@ -273,7 +273,10 @@ class RentController extends Controller
                 $interval = $startTime->diff($endTime);
                 $totalHours = $interval->h + ($interval->days * 24);
             }
-
+            $is_all_day = $request->is_all_day;
+            if($is_all_day == 0 && $totalHours >= 24){
+                $is_all_day = 1;
+            }
             $rent->user_id = $request->user_id ?? $rent->user_id;
             $rent->room_id = $request->room_id ?? $rent->room_id;
             $rent->date_start = $date_start ?? $rent->date_start;
@@ -284,7 +287,7 @@ class RentController extends Controller
             $rent->event_desc = $request->event_desc ?? $rent->event_desc;
             $rent->guest_count = $request->guest_count ?? $rent->guest_count;
             $rent->organization = $request->organization ?? $rent->organization;
-            $rent->is_all_day = $totalHours >= 24 ? 1 : $rent->is_all_day;
+            $rent->is_all_day = $is_all_day ?? $rent->is_all_day;
 
             $rent->save();
 
