@@ -217,7 +217,7 @@ class RentController extends Controller
             }else{
                 $rent = Rent::where('rents.id', $id)
                     ->leftjoin('user_details as ud', 'ud.user_id', '=', 'rents.user_id')
-                    ->select('rents.*', 'ud.name as user_name', 'ud.phone_number as user_phone')
+                    ->select('rents.*', 'ud.nip as user_nip','ud.name as user_name', 'ud.phone_number as user_phone')
                     ->with('Room')
                     ->first();
             }
