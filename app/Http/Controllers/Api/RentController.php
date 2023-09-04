@@ -28,7 +28,7 @@ class RentController extends Controller
                 })
                 ->when($request->start_date && $request->end_date, function ($query) use ($request) {
                     return $query->whereDate('date_start', '>=',$request->start_date)
-                        ->whereDate('date_end', '<=',$request->end_date);
+                        ->whereDate('date_start', '<=',$request->end_date);
                 })
                 ->where('status', '!=', 'expired')
                 ->where('user_id', Auth::user()->id)
@@ -175,7 +175,10 @@ class RentController extends Controller
 
         $interval = $startTime->diff($endTime);
         $totalHours = $interval->h + ($interval->days * 24);
-
+        $is_all_day = $request->is_all_day;
+        if($is_all_day == 0 && $totalHours >= 24){
+            $is_all_day = 1;
+        }
         DB::beginTransaction();
         try{
             $store_rent = new Rent();
@@ -189,7 +192,7 @@ class RentController extends Controller
             $store_rent->event_desc = $request->event_desc;
             $store_rent->guest_count = $request->guest_count;
             $store_rent->organization = $request->organization;
-            $store_rent->is_all_day = ($request->is_all_day == 1 && $totalHours >= 24 || $totalHours >= 24) ? 1 : 0;
+            $store_rent->is_all_day = ($is_all_day == 1) ? 1 : 0;
             $store_rent->save();
 
             DB::commit();
