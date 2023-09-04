@@ -14,7 +14,6 @@ use DateTime;
 use DB;
 use Illuminate\Support\Facades\Auth;
 use Validator;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class RentController extends Controller
 {
     public function index(Request $request)
@@ -26,6 +25,10 @@ class RentController extends Controller
                 })
                 ->when($request->search, function ($query) use ($request) {
                     return $query->where('event_name', 'LIKE','%'.$request->search.'%');
+                })
+                ->when($request->start_date && $request->end_date, function ($query) use ($request) {
+                    return $query->whereDate('date_start', '>=',$request->start_date)
+                        ->whereDate('date_end', '<=',$request->end_date);
                 })
                 ->where('user_id', Auth::user()->id)
                 ->get()
@@ -46,10 +49,6 @@ class RentController extends Controller
                 ->select('ud.name as user_name', 'ud.phone_number as user_phone', 'vud.name as verificator_name', 'vud.phone_number as verificator_phone','rents.*')
                 ->get()
                 ->toArray();
-            }
-            $folderPath = public_path('qrcodes');
-            if (!file_exists($folderPath)) {
-                mkdir($folderPath, 0777, true);
             }
             $reform = array_map(function ($new) {
                 return [
