@@ -52,16 +52,6 @@ class RentController extends Controller
                 mkdir($folderPath, 0777, true);
             }
             $reform = array_map(function ($new) {
-                $data = [
-                    'rent_id' => $new['id'], 
-                    'room_id' => $new['room_id']
-                ];
-                $dataString = json_encode($data);
-                $name_file = str_replace(' ','_', $new['event_name']);
-                $folderPath = public_path('qrcodes');
-                $qrcode = QrCode::size(300)->generate($dataString);
-                $svgPath = $folderPath . '/qrcode_' . $name_file . '.svg';
-                file_put_contents($svgPath, $qrcode);
                 return [
                     'id' => $new['id'],
                     'user_id' => $new['user_id'],
@@ -76,7 +66,6 @@ class RentController extends Controller
                     'organization' => $new['organization'],
                     'status' => $new['status'],
                     'notes' => $new['notes'],
-                    'qrcode' => asset('qrcodes/qrcode_'.$name_file.'.svg'),
                     'user_name' => $new['user_name'],
                     'user_phone' => $new['user_phone'],
                     'verificator_name' => $new['verificator_name'],
