@@ -406,7 +406,7 @@ class RentController extends Controller
             $room_first = MasterRoom::where('id', $room_id)
                 ->first();
             if(!$room_first){
-                return ResponseJson::response('failed', 'Current Meeting Not Found.', 404, null);
+                return ResponseJson::response('failed', 'Master Room Not Found.', 404, null);
             }
 
             
