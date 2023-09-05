@@ -26,11 +26,8 @@ class MasterRoomController extends Controller
                 ->toArray();
             $i = 0;
             $reform = array_map(function($new) use (&$i) { 
-               
                 $url = request('url', env('FE_WEB_URL').'/room/scan/'.$new['id']);
-            
                 $qrCode = QrCode::format('png')->size(200)->generate($url);
-
                 $base64Image = 'data:image/png;base64,' . base64_encode($qrCode);
                 $i++;
                 return [
