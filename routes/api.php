@@ -24,7 +24,7 @@ Route::group(['prefix' => 'v1/guest'], function ($router) {
     $router->get('/list/room', [LandingpageController::class, 'listRoom'])->name('landingpage.list.room');
     $router->get('/list/current-meeting/{room_id}', [LandingpageController::class, 'listCurrentRent'])->name('landingpage.current.event');
 });
-Route::group(['prefix' => 'v1/rent'], function ($router) {
+Route::group(['prefix' => 'v1/room'], function ($router) {
     $router->get('/check-meeting/{room_id}', [RentController::class, 'checkMeeting'])->name('guest.checkMeeting');
 });
 Route::group(['middleware' => 'auth:api'], function ($router) {
