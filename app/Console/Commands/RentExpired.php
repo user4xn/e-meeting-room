@@ -27,7 +27,7 @@ class RentExpired extends Command
      */
     public function handle()
     {
-        $rents = Rent::whereIn('status', ['unapproved', 'approved'])
+        $rents = Rent::where('status', 'unapproved')
             ->get();
         $datetime_now = Carbon::now()->format('Y-m-d H:i:s');
         foreach($rents as $rent){
