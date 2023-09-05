@@ -411,8 +411,8 @@ class RentController extends Controller
             $current_rent = Rent::select('event_name', 'event_desc', 'date_start', 'time_start', 'time_end', 'guest_count', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now) {
-                    $query->whereRaw("CONCAT(date_start, ' ', time_start) <= ?", [$datetime_now])
-                        ->whereRaw("CONCAT(date_end, ' ', time_end) >= ?", [$datetime_now]);
+                    $query->whereRaw("CONCAT(date_start, ' ', time_start) <= ?", $datetime_now)
+                        ->whereRaw("CONCAT(date_end, ' ', time_end) >= ?", $datetime_now);
                 })
                 ->where('status', 'approved')
                 ->orderBy('date_start', 'ASC')
@@ -438,9 +438,12 @@ class RentController extends Controller
             }
             $next_events = Rent::select('event_name', 'event_desc', 'date_start', 'date_end','time_start', 'time_end', 'organization', 'created_at')
                 ->where('room_id', $room_id)
+                ->when($current_rent, function($query) use ($current_rent){
+                    $query->where('id', '!=', $current_rent->id);
+                })
                 ->where(function ($query) use ($datetime_now) {
-                    $query->whereRaw("CONCAT(date_start, ' ', time_start) <= ?", [$datetime_now])
-                        ->whereRaw("CONCAT(date_end, ' ', time_end) >= ?", [$datetime_now]);
+                    $query->whereRaw("CONCAT(date_start, ' ', time_start) >= ?", $datetime_now)
+                        ->whereRaw("CONCAT(date_end, ' ', time_end) >= ?", $datetime_now);
                 })
                 ->where('status', 'approved')
                 ->orderBy('date_start', 'ASC')
