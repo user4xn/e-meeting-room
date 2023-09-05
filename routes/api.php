@@ -22,6 +22,9 @@ Route::group(['prefix' => 'v1/auth'], function ($router) {
 Route::group(['prefix' => 'v1/guest'], function ($router) {
     $router->post('/store', [GuestController::class, 'store'])->name('guest.store');
 });
+Route::group(['prefix' => 'v1/rent'], function ($router) {
+    $router->get('/check-meeting/{room_id}', [RentController::class, 'checkMeeting'])->name('guest.checkMeeting');
+});
 Route::group(['prefix' => 'v1/public'], function ($router) {
     $router->get('/list/room', [LandingpageController::class, 'listRoom'])->name('landingpage.list.room');
     $router->get('/list/event/{room_id}', [LandingpageController::class, 'listCurrentRent'])->name('landingpage.current.event');

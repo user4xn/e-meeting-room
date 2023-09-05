@@ -267,7 +267,7 @@ class UserController extends Controller
                 'email_verified_at' => date('Y-m-d H:i:s')
             ]);
             DB::commit();
-            return ResponseJson::response('success', 'Success Verification', 200, null);
+            return redirect()->to(env('FE_WEB_URL').'/auth/success-verify');
         } catch (\Exception $e) {
             DB::rollback();
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);

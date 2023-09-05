@@ -397,4 +397,113 @@ class RentController extends Controller
         return ResponseJson::response('success', 'Success Get Select Option Master Room.', 200, $fetch); 
     }
 
+    public function checkMeeting($room_id)
+    {
+        try{
+
+            $time_now = Carbon::now()->format('H:i:s');
+            $date_now = Carbon::now()->format('Y-m-d');
+            $room_first = MasterRoom::where('id', $room_id)
+                ->first();
+            if(!$room_first){
+                return ResponseJson::response('failed', 'Current Meeting Not Found.', 404, null);
+            }
+
+            
+            $current_rent = Rent::select('event_name', 'event_desc', 'date_start','time_start', 'time_end', 'guest_count', 'organization', 'created_at')
+                ->where('room_id', $room_id)
+                ->whereDate('date_start', '>=',$date_now)
+                ->whereDate('date_end', '<=',$date_now)
+                ->where('time_start', '<=',$time_now)
+                ->where('time_end', '>=',$time_now)
+                ->where('status', 'approved')
+                ->orderBy('date_start', 'ASC')
+                ->first();
+
+            $room_first->current_event = $current_rent;
+
+            $data_next_events = [];
+            if($current_rent){
+                $next_events = Rent::select('event_name', 'event_desc', 'date_start','time_start', 'time_end', 'organization', 'created_at')
+                    ->where('room_id', $room_id)
+                    ->whereDate('date_start', '<=',$date_now)
+                    ->whereDate('date_end', '>=',$date_now)
+                    ->where('time_start', '>=',$time_now)
+                    ->where('time_end', '>=',$time_now)
+                    ->where('status', 'approved')
+                    ->orderBy('date_start', 'ASC')
+                    ->get()
+                    ->toArray();
+                $is_status = false;
+                if($current_rent->time_start <= $time_now && $current_rent->time_end >= $time_now){
+                    $is_status = true;
+                }
+                $data_next_events[] = array(
+                    'event_name' => $current_rent->event_name,
+                    'event_desc' => $current_rent->event_desc,
+                    'date_start' => $current_rent->date_start,
+                    'time_start' => $current_rent->time_start,
+                    'time_end' => $current_rent->time_end,
+                    'organization' => $current_rent->organization,
+                    'is_status' => $is_status,
+                    'created_at' => $current_rent->created_at,
+                );
+                foreach($next_events as $ne){
+                    $is_status = false;
+                    if($ne['time_start'] <= $time_now && $ne['time_end'] >= $time_now){
+                        $is_status = true;
+                    }
+
+                    $data_next_events[] = array(
+                        'event_name' => $ne['event_name'],
+                        'event_desc' => $ne['event_desc'],
+                        'date_start' => $ne['date_start'],
+                        'time_start' => $ne['time_start'],
+                        'time_end' => $ne['time_end'],
+                        'organization' => $ne['organization'],
+                        'is_status' => $is_status,
+                        'created_at' => $ne['created_at'],
+                    );
+                }
+            }else{
+                $next_events = Rent::select('event_name', 'event_desc', 'date_start','time_start', 'time_end', 'organization', 'created_at')
+                    ->where('room_id', $room_id)
+                    ->whereDate('date_start', '<=',$date_now)
+                    ->whereDate('date_end', '>=',$date_now)
+                    ->where('time_start', '>=',$time_now)
+                    ->where('time_end', '>=',$time_now)
+                    ->where('status', 'approved')
+                    ->orderBy('date_start', 'ASC')
+                    ->get()
+                    ->toArray();
+                foreach($next_events as $ne){
+                    $is_status = false;
+                    if($ne['time_start'] <= $time_now && $ne['time_end'] >= $time_now){
+                        $is_status = true;
+                    }
+
+                    $data_next_events[] = array(
+                        'event_name' => $ne['event_name'],
+                        'event_desc' => $ne['event_desc'],
+                        'date_start' => $ne['date_start'],
+                        'time_start' => $ne['time_start'],
+                        'time_end' => $ne['time_end'],
+                        'organization' => $ne['organization'],
+                        'is_status' => $is_status,
+                        'created_at' => $ne['created_at'],
+                    );
+                }
+                
+            }
+            $data = array(
+                'current_event' => $room_first,
+                'next_events' => $data_next_events
+            );
+
+            return ResponseJson::response('success', 'Success Get Current Meeting.', 200, $data);
+        }catch(\Exception $e){
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
+        }
+    }
+
 }

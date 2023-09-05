@@ -13,7 +13,15 @@ class Rent extends Model
     {
         return $this->hasOne('App\Models\MasterRoom', 'id', 'room_id');
     }
-    
+    public function getDateStartAttribute($value)
+    {
+        return indoDate($value);
+    }
+
+    public function getDateEndAttribute($value)
+    {
+        return indoDate($value);
+    }
     public function getCreatedAtAttribute($value)
     {
         return date('Y-m-d H:i:s', strtotime($value));
