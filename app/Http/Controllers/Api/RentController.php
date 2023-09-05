@@ -420,8 +420,6 @@ class RentController extends Controller
                 ->orderBy('date_start', 'ASC')
                 ->first();
 
-            $room_first->current_event = $current_rent;
-
             $data_next_events = [];
             if($current_rent){
                 $next_events = Rent::select('event_name', 'event_desc', 'date_start','time_start', 'time_end', 'organization', 'created_at')
@@ -496,7 +494,10 @@ class RentController extends Controller
                 
             }
             $data = array(
-                'current_event' => $room_first,
+                'id' => $room_first->id,
+                'room_name' => $room_first->room_name,
+                'room_desc' => $room_first->room_desc,
+                'current_event' => $current_rent,
                 'next_events' => $data_next_events
             );
 
