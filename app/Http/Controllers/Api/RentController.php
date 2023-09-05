@@ -497,6 +497,7 @@ class RentController extends Controller
                 'id' => $room_first->id,
                 'room_name' => $room_first->room_name,
                 'room_desc' => $room_first->room_desc,
+                'room_capacity' => $room_first->room_capacity,
                 'current_event' => $current_rent,
                 'next_events' => $data_next_events
             );
