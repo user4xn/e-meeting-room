@@ -402,6 +402,7 @@ class RentController extends Controller
     {
         try{
             $datetime_now = Carbon::now()->format('Y-m-d H:i:s');
+            $date_now = Carbon::now()->format('Y-m-d');
             $room_first = MasterRoom::where('id', $room_id)
                 ->first();
             if(!$room_first){
@@ -419,31 +420,28 @@ class RentController extends Controller
                 ->orderBy('date_start', 'ASC')
                 ->first();
             $data_next_events = [];
-            if($current_rent){
-                $is_status = false;
-                $datetime_start = $current_rent->date_start.' '.$current_rent->time_start;
-                $datetime_end = $current_rent->date_end.' '.$current_rent->time_end;
-                if($datetime_start <= $datetime_now && $datetime_end >= $datetime_end){
-                    $is_status = true;
-                }
-                $data_next_events[] = array(
-                    'event_name' => $current_rent->event_name,
-                    'event_desc' => $current_rent->event_desc,
-                    'date_start' => $current_rent->date_start,
-                    'time_start' => $current_rent->time_start,
-                    'time_end' => $current_rent->time_end,
-                    'organization' => $current_rent->organization,
-                    'is_status' => $is_status,
-                    'created_at' => $current_rent->created_at,
-                );
-            }
+            // if($current_rent){
+            //     $is_status = false;
+            //     $datetime_start = $current_rent->date_start.' '.$current_rent->time_start;
+            //     $datetime_end = $current_rent->date_end.' '.$current_rent->time_end;
+            //     if($current_rent->date_start == $date_now && $datetime_end >= $datetime_end){
+            //         $is_status = true;
+            //     }
+            //     $data_next_events[] = array(
+            //         'event_name' => $current_rent->event_name,
+            //         'event_desc' => $current_rent->event_desc,
+            //         'date_start' => $current_rent->date_start,
+            //         'time_start' => $current_rent->time_start,
+            //         'time_end' => $current_rent->time_end,
+            //         'organization' => $current_rent->organization,
+            //         'is_status' => $is_status,
+            //         'created_at' => $current_rent->created_at,
+            //     );
+            // }
             $next_events = Rent::select('event_name', 'event_desc', 'date_start', 'date_end','time_start', 'time_end', 'organization', 'created_at')
                 ->where('room_id', $room_id)
-                ->when($current_rent, function($query) use ($current_rent){
-                    $query->where('id', '!=', $current_rent->id);
-                })
-                ->where(function ($query) use ($datetime_now) {
-                    $query->whereRaw("CONCAT(date_start, ' ', time_start) >= ?", $datetime_now)
+                ->where(function ($query) use ($datetime_now, $date_now) {
+                    $query->whereRaw("date_start = ?", $date_now)
                         ->whereRaw("CONCAT(date_end, ' ', time_end) >= ?", $datetime_now);
                 })
                 ->where('status', 'approved')
