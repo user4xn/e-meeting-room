@@ -14,6 +14,7 @@ use DateTime;
 use DB;
 use Illuminate\Support\Facades\Auth;
 use Validator;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class RentController extends Controller
 {
     public function index(Request $request)
@@ -468,11 +469,14 @@ class RentController extends Controller
                     'created_at' => $ne['created_at'],
                 );
             }
-            
+            $url = request('url', env('FE_WEB_URL').'/room/scan/'.$room_first->id);
+            $qrCode = QrCode::format('png')->size(200)->generate($url);
+            $base64Image = 'data:image/png;base64,' . base64_encode($qrCode);
             $data = array(
                 'id' => $room_first->id,
                 'room_name' => $room_first->room_name,
                 'room_desc' => $room_first->room_desc,
+                'qrcode' => $base64Image,
                 'date_now' => indoDate(Carbon::now()->format('Y-m-d')),
                 'room_capacity' => $room_first->room_capacity,
                 'current_event' => $current_rent,
