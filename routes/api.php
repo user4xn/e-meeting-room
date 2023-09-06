@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\MasterRoomController;
 use App\Http\Controllers\Api\RentController;
 use App\Http\Controllers\Api\UserController;
@@ -28,6 +29,9 @@ Route::group(['prefix' => 'v1/room'], function ($router) {
     $router->get('/check-meeting/{room_id}', [RentController::class, 'checkMeeting'])->name('guest.checkMeeting');
 });
 Route::group(['middleware' => 'auth:api'], function ($router) {
+    $router->group(['prefix' => 'v1/dashboard'], function ($router) {
+        $router->get('/', [DashboardController::class, 'dashboard']);
+    });
     $router->group(['prefix' => 'v1/auth'], function ($router) {
         $router->get('/get-profile', [UserController::class, 'getProfileUser']);
         $router->post('/logout', [AuthController::class, 'logout']);
