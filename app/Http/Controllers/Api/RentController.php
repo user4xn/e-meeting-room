@@ -15,51 +15,52 @@ use DB;
 use Illuminate\Support\Facades\Auth;
 use Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
 class RentController extends Controller
 {
     public function index(Request $request)
     {
         try {
-            if(Auth::user()->role != "Admin"){
+            if (Auth::user()->role != "Admin") {
                 $fetch = Rent::when($request->status, function ($query) use ($request) {
                     return $query->where('status', $request->status);
                 })
-                ->when($request->search, function ($query) use ($request) {
-                    return $query->where('event_name', 'LIKE','%'.$request->search.'%');
-                })
-                ->when($request->start_date && $request->end_date, function ($query) use ($request) {
-                    return $query->whereDate('date_start', '>=',$request->start_date)
-                        ->whereDate('date_start', '<=',$request->end_date);
-                })
-                ->where('status', '!=', 'expired')
-                ->where('user_id', Auth::user()->id)
-                ->get()
-                ->toArray();
-            }else{
+                    ->when($request->search, function ($query) use ($request) {
+                        return $query->where('event_name', 'LIKE', '%' . $request->search . '%');
+                    })
+                    ->when($request->start_date && $request->end_date, function ($query) use ($request) {
+                        return $query->whereDate('date_start', '>=', $request->start_date)
+                            ->whereDate('date_start', '<=', $request->end_date);
+                    })
+                    ->where('status', '!=', 'expired')
+                    ->where('user_id', Auth::user()->id)
+                    ->get()
+                    ->toArray();
+            } else {
                 $fetch = Rent::when($request->status, function ($query) use ($request) {
                     return $query->where('status', $request->status);
                 })
-                ->when($request->search, function ($query) use ($request) {
-                    return $query->where('event_name', 'LIKE','%'.$request->search.'%');
-                })
-                ->when($request->start_date && $request->end_date, function ($query) use ($request) {
-                    return $query->whereDate('date_start', '>=',$request->start_date)
-                        ->whereDate('date_end', '<=',$request->end_date);
-                })
-                ->where('status', '!=', 'expired')
-                ->leftjoin('user_details as ud', 'ud.user_id', '=', 'rents.user_id')
-                ->leftjoin('user_details as vud', 'vud.user_id', '=', 'rents.verificator_user_id')
-                ->select('ud.name as user_name', 'ud.phone_number as user_phone', 'vud.name as verificator_name', 'vud.phone_number as verificator_phone','rents.*')
-                ->get()
-                ->toArray();
+                    ->when($request->search, function ($query) use ($request) {
+                        return $query->where('event_name', 'LIKE', '%' . $request->search . '%');
+                    })
+                    ->when($request->start_date && $request->end_date, function ($query) use ($request) {
+                        return $query->whereDate('date_start', '>=', $request->start_date)
+                            ->whereDate('date_end', '<=', $request->end_date);
+                    })
+                    ->where('status', '!=', 'expired')
+                    ->leftjoin('user_details as ud', 'ud.user_id', '=', 'rents.user_id')
+                    ->leftjoin('user_details as vud', 'vud.user_id', '=', 'rents.verificator_user_id')
+                    ->select('ud.name as user_name', 'ud.phone_number as user_phone', 'vud.name as verificator_name', 'vud.phone_number as verificator_phone', 'rents.*')
+                    ->get()
+                    ->toArray();
             }
             $reform = array_map(function ($new) {
                 return [
                     'id' => $new['id'],
                     'user_id' => $new['user_id'],
                     'room_id' => $new['room_id'],
-                    'date_start' => $new['date_start'].' '.$new['time_start'],
-                    'date_end' => $new['date_end'].' '.$new['time_end'],
+                    'date_start' => $new['date_start'] . ' ' . $new['time_start'],
+                    'date_end' => $new['date_end'] . ' ' . $new['time_end'],
                     'time_start' => $new['time_start'],
                     'time_end' => $new['time_end'],
                     'event_name' => $new['event_name'],
@@ -76,54 +77,52 @@ class RentController extends Controller
                     'updated_at' => $new['updated_at'],
                 ];
             }, $fetch);
-        
+
             return ResponseJson::response('success', 'Success Get List Rent.', 200, $reform);
         } catch (\Exception $e) {
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
-        
     }
 
     public function listCalendar()
     {
-        try{
+        try {
             $fetch = Rent::whereIn('status', ['approved', 'unapproved', 'expired'])
                 ->get()
                 ->toArray();
 
             $i = 0;
-            $reform = array_map(function($new) use (&$i) { 
+            $reform = array_map(function ($new) use (&$i) {
                 $i++;
                 return [
                     'id' => $new['id'],
                     'url' => '',
                     'title' => $new['event_name'],
-                    'start' => $new['date_start'].' '.$new['time_start'],
-                    'end' => $new['date_end'].' '.$new['time_end'],
+                    'start' => $new['date_start'] . ' ' . $new['time_start'],
+                    'end' => $new['date_end'] . ' ' . $new['time_end'],
                     'allDay' => $new['is_all_day'] == 1 ? true : false,
                     'extendedProps' => array(
                         'calendar' => ($new['status'] == "approved") ? $new['organization'] : ucwords($new['status'])
                     )
-                ]; 
+                ];
             }, $fetch);
-            return ResponseJson::response('success', 'Success Get List Calendar.', 200, ['events' => $reform]); 
-        }catch(\Exception $e){
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
+            return ResponseJson::response('success', 'Success Get List Calendar.', 200, ['events' => $reform]);
+        } catch (\Exception $e) {
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
     }
 
     public function listPersonResponsible()
     {
-        try{
-            $users = User::select('users.id', 'username', 'email','name')
+        try {
+            $users = User::select('users.id', 'username', 'email', 'name')
                 ->leftjoin('user_details as ud', 'ud.user_id', '=', 'users.id')
                 ->where('users.status', 'Active')
                 ->where('ud.name', '!=', null)
                 ->get();
-            return ResponseJson::response('success', 'Success Get List Person Responsible.', 200, $users); 
-            
-        }catch(\Exception $e){
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
+            return ResponseJson::response('success', 'Success Get List Person Responsible.', 200, $users);
+        } catch (\Exception $e) {
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
     }
 
@@ -139,8 +138,8 @@ class RentController extends Controller
             'guest_count' => 'required',
             'organization' => 'required',
             'is_all_day' => 'required',
-        ],[
-            'user_id' => 'Please Input Request user_id.', 
+        ], [
+            'user_id' => 'Please Input Request user_id.',
             'room_id' => 'Please Input Request room_id.',
             'datetime_start' => 'Please Input Request date_start.',
             'datetime_end' => 'Please Input Request datetime_end.',
@@ -156,13 +155,13 @@ class RentController extends Controller
         $check_user = User::select('id')
             ->where('id', $request->user_id)
             ->first();
-        if(!$check_user){
+        if (!$check_user) {
             return ResponseJson::response('failed', 'Please Check Person Responsible', 400, null);
         }
         $check_room = MasterRoom::select('id')
             ->where('id', $request->room_id)
             ->first();
-        if(!$check_room){
+        if (!$check_room) {
             return ResponseJson::response('failed', 'Please Check Master Room', 400, null);
         }
 
@@ -177,11 +176,11 @@ class RentController extends Controller
         $interval = $startTime->diff($endTime);
         $totalHours = $interval->h + ($interval->days * 24);
         $is_all_day = $request->is_all_day;
-        if($is_all_day == 0 && $totalHours >= 24){
+        if ($is_all_day == 0 && $totalHours >= 24) {
             $is_all_day = 1;
         }
         DB::beginTransaction();
-        try{
+        try {
             $store_rent = new Rent();
             $store_rent->user_id = $request->user_id;
             $store_rent->room_id = $request->room_id;
@@ -197,62 +196,60 @@ class RentController extends Controller
             $store_rent->save();
 
             DB::commit();
-            return ResponseJson::response('success', 'Success Store Data Rent.', 200, null); 
-            
-        }catch(\Exception $e){
+            return ResponseJson::response('success', 'Success Store Data Rent.', 200, null);
+        } catch (\Exception $e) {
             DB::rollback();
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
     }
 
     public function detail($id)
     {
-        try{
-            if(Auth::user()->role != "Admin"){
+        try {
+            if (Auth::user()->role != "Admin") {
                 $user_id = Auth::user()->id;
                 $rent = Rent::where('rents.id', $id)
                     ->where('user_id', $user_id)
                     ->select('ud.name as user_name', 'ud.phone_number as user_phone', 'rents.*')
                     ->with('Room')
                     ->first();
-            }else{
+            } else {
                 $rent = Rent::where('rents.id', $id)
                     ->leftjoin('user_details as ud', 'ud.user_id', '=', 'rents.user_id')
-                    ->select('rents.*', 'ud.nip as user_nip','ud.name as user_name', 'ud.phone_number as user_phone')
+                    ->select('rents.*', 'ud.nip as user_nip', 'ud.name as user_name', 'ud.phone_number as user_phone')
                     ->with('Room')
                     ->first();
             }
-            if(!$rent){
-                return ResponseJson::response('failed', 'Rent Not Found.', 404, null); 
+            if (!$rent) {
+                return ResponseJson::response('failed', 'Rent Not Found.', 404, null);
             }
-            return ResponseJson::response('success', 'Success Get Detail Rent.', 200, $rent); 
-            
-        }catch(\Exception $e){
-            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
+            return ResponseJson::response('success', 'Success Get Detail Rent.', 200, $rent);
+        } catch (\Exception $e) {
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
     }
 
     public function update(Request $request, $id)
     {
 
-        if(Auth::user()->role != "Admin"){
+        if (Auth::user()->role != "Admin") {
             $user_id = Auth::user()->id;
             $rent = Rent::where('id', $id)
                 ->where('user_id', $user_id)
                 ->where('status', 'unapproved')
                 ->first();
-        }else{
+        } else {
             $rent = Rent::where('id', $id)
                 ->where('status', 'unapproved')
                 ->first();
         }
-        
+
         if (!$rent) {
             return ResponseJson::response('failed', 'Rent Not Found.', 404, null);
         }
-        
+
         DB::beginTransaction();
-        
+
         try {
 
             $date_start = "";
@@ -260,17 +257,17 @@ class RentController extends Controller
             $date_end = "";
             $time_end = "";
             $totalHours = 0;
-            if($request->datetime_start){
+            if ($request->datetime_start) {
                 $date_start = Carbon::parse($request->datetime_start)->format('Y-m-d');
                 $time_start = Carbon::parse($request->datetime_start)->format('H:i:s');
             }
 
-            if($request->datetime_end){
+            if ($request->datetime_end) {
                 $date_end = Carbon::parse($request->datetime_end)->format('Y-m-d');
                 $time_end = Carbon::parse($request->datetime_end)->format('H:i:s');
             }
 
-            if($request->datetime_start && $request->datetime_end){
+            if ($request->datetime_start && $request->datetime_end) {
                 $startTime = new DateTime($request->datetime_start);
                 $endTime = new DateTime($request->datetime_end);
 
@@ -278,7 +275,7 @@ class RentController extends Controller
                 $totalHours = $interval->h + ($interval->days * 24);
             }
             $is_all_day = $request->is_all_day;
-            if($is_all_day == 0 && $totalHours >= 24){
+            if ($is_all_day == 0 && $totalHours >= 24) {
                 $is_all_day = 1;
             }
             $rent->user_id = $request->user_id ?? $rent->user_id;
@@ -291,7 +288,7 @@ class RentController extends Controller
             $rent->event_desc = $request->event_desc ?? $rent->event_desc;
             $rent->guest_count = $request->guest_count ?? $rent->guest_count;
             $rent->organization = $request->organization ?? $rent->organization;
-            $rent->is_all_day = $is_all_day ?? $rent->is_all_day;
+            $rent->is_all_day =  $request->is_all_day;
 
             $rent->save();
 
@@ -302,7 +299,7 @@ class RentController extends Controller
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
     }
-    
+
     public function updateStatus(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
@@ -311,7 +308,7 @@ class RentController extends Controller
             'status.required' => 'Please Input Request status.',
             'status.in' => 'There is no choice of that status.',
         ]);
-        
+
         if ($validator->fails()) {
             return ResponseJson::response('failed', 'Error Validation', 422, ['error' => $validator->errors()]);
         }
@@ -319,32 +316,49 @@ class RentController extends Controller
         $rent = Rent::where('id', $id)
             ->where('status', 'unapproved')
             ->first();
-        
+
         if (!$rent) {
             return ResponseJson::response('failed', 'Rent Not Found.', 404, null);
         }
-        
+        // if ($request->status == "approved") {
+        //     $check_duplicate_rents = Rent::whereDate('date_start', $rent->date_start)
+        //         ->where('id', '!=', $rent->id)
+        //         ->get();
+
+        //     $data_duplicates = [];
+        //     foreach ($check_duplicate_rents as $cdr) {
+        //         if ($cdr->time_start >= $rent->time_start && $cdr->time_end <= $rent->time_end) {
+        //             // Rent::where('id', $cdr->id)
+        //             //     ->update([
+        //             //         'status' => 'rejected'
+        //             //     ]);
+        //             $data_duplicates[] = $cdr;
+        //         } else if($cdr->time_start <= $rent->time_start && $cdr->time_end >= $rent->time_end){
+        //             $data_duplicates[] = $cdr;
+        //         }
+
+        //         return $data_duplicates;
+        //     }
+        // }
         DB::beginTransaction();
-        
         try {
             $rent->status = $request->status;
-            
+
             if ($request->status == 'rejected') {
                 $validator = Validator::make($request->all(), [
                     'notes' => 'required',
                 ], [
                     'notes.required' => 'Please Input Notes.',
                 ]);
-        
+
                 if ($validator->fails()) {
                     return ResponseJson::response('failed', 'Error Validation', 422, ['error' => $validator->errors()]);
                 }
-        
+
                 $rent->notes = $request->notes;
             }
-
             $rent->verificator_user_id = Auth::user()->id;
-            
+
             $rent->save();
             DB::commit();
             return ResponseJson::response('success', 'Success Update Status Rent.', 200, null);
@@ -356,7 +370,7 @@ class RentController extends Controller
 
     public function currentMeeting($room_id)
     {
-        try{
+        try {
             $date_now = Carbon::now()->format('Y-m-d');
             $time_now = Carbon::now()->format('H:i:s');
             $check_rent = Rent::where('room_id', $room_id)
@@ -367,17 +381,17 @@ class RentController extends Controller
                 ->first();
 
             return ResponseJson::response('success', 'Get List Current Meeting.', 200, $check_rent);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
     }
 
     public function delete($rent_id)
     {
-        if(Auth::user()->role != "Admin"){
+        if (Auth::user()->role != "Admin") {
             $rent = Rent::where('id', $rent_id)
                 ->first();
-        }else{
+        } else {
             $rent = Rent::where('id', $rent_id)
                 ->where('user_id', Auth::user()->id)
                 ->first();
@@ -395,21 +409,21 @@ class RentController extends Controller
             ->orderBy('created_at', 'DESC')
             ->get()
             ->toArray();
-        return ResponseJson::response('success', 'Success Get Select Option Master Room.', 200, $fetch); 
+        return ResponseJson::response('success', 'Success Get Select Option Master Room.', 200, $fetch);
     }
 
     public function checkMeeting($room_id)
     {
-        try{
+        try {
             $datetime_now = Carbon::now()->format('Y-m-d H:i:s');
             $date_now = Carbon::now()->format('Y-m-d');
             $room_first = MasterRoom::where('id', $room_id)
                 ->first();
-            if(!$room_first){
+            if (!$room_first) {
                 return ResponseJson::response('failed', 'Master Room Not Found.', 404, null);
             }
 
-            
+
             $current_rent = Rent::select('event_name', 'event_desc', 'date_start', 'time_start', 'time_end', 'guest_count', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {
@@ -421,7 +435,7 @@ class RentController extends Controller
                 ->orderBy('date_start', 'ASC')
                 ->first();
             $data_next_events = [];
-            $next_events = Rent::select('event_name', 'event_desc', 'date_start', 'date_end','time_start', 'time_end', 'organization', 'created_at')
+            $next_events = Rent::select('event_name', 'event_desc', 'date_start', 'date_end', 'time_start', 'time_end', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {
                     $query->whereRaw("date_start = ?", $date_now)
@@ -431,11 +445,11 @@ class RentController extends Controller
                 ->orderBy('date_start', 'ASC')
                 ->get()
                 ->toArray();
-            foreach($next_events as $ne){
+            foreach ($next_events as $ne) {
                 $is_status = false;
-                $datetime_start = $ne['date_start'].' '.$ne['time_start'];
-                $datetime_end = $ne['date_end'].' '.$ne['time_end'];
-                if($datetime_start <= $datetime_now && $datetime_end >= $datetime_now){
+                $datetime_start = $ne['date_start'] . ' ' . $ne['time_start'];
+                $datetime_end = $ne['date_end'] . ' ' . $ne['time_end'];
+                if ($datetime_start <= $datetime_now && $datetime_end >= $datetime_now) {
                     $is_status = true;
                 }
 
@@ -461,23 +475,23 @@ class RentController extends Controller
             );
 
             return ResponseJson::response('success', 'Success Get Current Meeting.', 200, $data);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
     }
 
     public function scheduleMeeting($room_id)
     {
-        try{
+        try {
             $datetime_now = Carbon::now()->format('Y-m-d H:i:s');
             $date_now = Carbon::now()->format('Y-m-d');
             $room_first = MasterRoom::where('id', $room_id)
                 ->first();
-            if(!$room_first){
+            if (!$room_first) {
                 return ResponseJson::response('failed', 'Master Room Not Found.', 404, null);
             }
 
-            
+
             $current_rent = Rent::select('event_name', 'event_desc', 'date_start', 'time_start', 'time_end', 'guest_count', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {
@@ -502,7 +516,7 @@ class RentController extends Controller
             //         'created_at' => $current_rent->created_at,
             //     );
             // }
-            $schedule_events = Rent::select('event_name', 'event_desc', 'date_start', 'date_end','time_start', 'time_end', 'organization', 'created_at')
+            $schedule_events = Rent::select('event_name', 'event_desc', 'date_start', 'date_end', 'time_start', 'time_end', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {
                     $query->whereRaw("CONCAT(date_start, ' ', time_start) >= ?", $datetime_now);
@@ -512,7 +526,7 @@ class RentController extends Controller
                 ->take(5)
                 ->get()
                 ->toArray();
-            foreach($schedule_events as $se){
+            foreach ($schedule_events as $se) {
                 $data_schedule_events[] = array(
                     'event_name' => $se['event_name'],
                     'event_desc' => $se['event_desc'],
@@ -525,7 +539,7 @@ class RentController extends Controller
                 );
             }
 
-            $url = request('url', env('FE_WEB_URL').'/room/scan/'.$room_first->id);
+            $url = request('url', env('FE_WEB_URL') . '/room/scan/' . $room_first->id);
             $qrCode = QrCode::format('png')->size(200)->generate($url);
             $base64Image = 'data:image/png;base64,' . base64_encode($qrCode);
             $data = array(
@@ -540,9 +554,8 @@ class RentController extends Controller
             );
 
             return ResponseJson::response('success', 'Success Get Current Meeting.', 200, $data);
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
         }
     }
-
 }
