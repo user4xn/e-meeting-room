@@ -488,19 +488,30 @@ class RentController extends Controller
                 ->where('status', 'approved')
                 ->orderBy('date_start', 'ASC')
                 ->first();
-                
+
+            $data_schedule_events = [];
+            // if($current_rent){
+            //     $data_schedule_events[] = array(
+            //         'event_name' => $current_rent->event_name,
+            //         'event_desc' => $current_rent->event_desc,
+            //         'date_start' => $current_rent->date_start,
+            //         'date_end' => $current_rent->date_end,
+            //         'time_start' => $current_rent->time_start,
+            //         'time_end' => $current_rent->time_end,
+            //         'organization' => $current_rent->organization,
+            //         'created_at' => $current_rent->created_at,
+            //     );
+            // }
             $schedule_events = Rent::select('event_name', 'event_desc', 'date_start', 'date_end','time_start', 'time_end', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {
-                    $query->whereRaw("date_start = ?", $date_now)
-                        ->whereRaw("CONCAT(date_end, ' ', time_end) >= ?", $datetime_now);
+                    $query->whereRaw("CONCAT(date_start, ' ', time_start) >= ?", $datetime_now);
                 })
                 ->where('status', 'approved')
                 ->orderBy('time_start', 'DESC')
                 ->take(5)
                 ->get()
                 ->toArray();
-            $data_schedule_events = [];
             foreach($schedule_events as $se){
                 $data_schedule_events[] = array(
                     'event_name' => $se['event_name'],
