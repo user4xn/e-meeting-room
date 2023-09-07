@@ -388,14 +388,9 @@ class RentController extends Controller
 
     public function delete($rent_id)
     {
-        if (Auth::user()->role != "Admin") {
-            $rent = Rent::where('id', $rent_id)
+       
+        $rent = Rent::where('id', $rent_id)
                 ->first();
-        } else {
-            $rent = Rent::where('id', $rent_id)
-                ->where('user_id', Auth::user()->id)
-                ->first();
-        }
         if (!$rent) {
             return ResponseJson::response('failed', 'Rent Not Found.', 404, null);
         }
