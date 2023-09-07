@@ -412,32 +412,15 @@ class RentController extends Controller
             
             $current_rent = Rent::select('event_name', 'event_desc', 'date_start', 'time_start', 'time_end', 'guest_count', 'organization', 'created_at')
                 ->where('room_id', $room_id)
-                ->where(function ($query) use ($datetime_now) {
-                    $query->whereRaw("CONCAT(date_start, ' ', time_start) <= ?", $datetime_now)
+                ->where(function ($query) use ($datetime_now, $date_now) {
+                    $query->whereRaw("date_start = ?", $date_now)
+                        ->whereRaw("CONCAT(date_start, ' ', time_start) <= ?", $datetime_now)
                         ->whereRaw("CONCAT(date_end, ' ', time_end) >= ?", $datetime_now);
                 })
                 ->where('status', 'approved')
                 ->orderBy('date_start', 'ASC')
                 ->first();
             $data_next_events = [];
-            // if($current_rent){
-            //     $is_status = false;
-            //     $datetime_start = $current_rent->date_start.' '.$current_rent->time_start;
-            //     $datetime_end = $current_rent->date_end.' '.$current_rent->time_end;
-            //     if($current_rent->date_start == $date_now && $datetime_end >= $datetime_end){
-            //         $is_status = true;
-            //     }
-            //     $data_next_events[] = array(
-            //         'event_name' => $current_rent->event_name,
-            //         'event_desc' => $current_rent->event_desc,
-            //         'date_start' => $current_rent->date_start,
-            //         'time_start' => $current_rent->time_start,
-            //         'time_end' => $current_rent->time_end,
-            //         'organization' => $current_rent->organization,
-            //         'is_status' => $is_status,
-            //         'created_at' => $current_rent->created_at,
-            //     );
-            // }
             $next_events = Rent::select('event_name', 'event_desc', 'date_start', 'date_end','time_start', 'time_end', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {
@@ -467,6 +450,70 @@ class RentController extends Controller
                     'created_at' => $ne['created_at'],
                 );
             }
+            $data = array(
+                'id' => $room_first->id,
+                'room_name' => $room_first->room_name,
+                'room_desc' => $room_first->room_desc,
+                'date_now' => indoDate(Carbon::now()->format('Y-m-d')),
+                'room_capacity' => $room_first->room_capacity,
+                'current_event' => $current_rent,
+                'next_events' => $data_next_events
+            );
+
+            return ResponseJson::response('success', 'Success Get Current Meeting.', 200, $data);
+        }catch(\Exception $e){
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
+        }
+    }
+
+    public function scheduleMeeting($room_id)
+    {
+        try{
+            $datetime_now = Carbon::now()->format('Y-m-d H:i:s');
+            $date_now = Carbon::now()->format('Y-m-d');
+            $room_first = MasterRoom::where('id', $room_id)
+                ->first();
+            if(!$room_first){
+                return ResponseJson::response('failed', 'Master Room Not Found.', 404, null);
+            }
+
+            
+            $current_rent = Rent::select('event_name', 'event_desc', 'date_start', 'time_start', 'time_end', 'guest_count', 'organization', 'created_at')
+                ->where('room_id', $room_id)
+                ->where(function ($query) use ($datetime_now, $date_now) {
+                    $query->whereRaw("date_start = ?", $date_now)
+                        ->whereRaw("CONCAT(date_start, ' ', time_start) <= ?", $datetime_now)
+                        ->whereRaw("CONCAT(date_end, ' ', time_end) >= ?", $datetime_now);
+                })
+                ->where('status', 'approved')
+                ->orderBy('date_start', 'ASC')
+                ->first();
+                
+            $schedule_events = Rent::select('event_name', 'event_desc', 'date_start', 'date_end','time_start', 'time_end', 'organization', 'created_at')
+                ->where('room_id', $room_id)
+                ->where(function ($query) use ($datetime_now, $date_now) {
+                    $query->whereRaw("date_start = ?", $date_now)
+                        ->whereRaw("CONCAT(date_end, ' ', time_end) >= ?", $datetime_now);
+                })
+                ->where('status', 'approved')
+                ->orderBy('time_start', 'DESC')
+                ->take(5)
+                ->get()
+                ->toArray();
+            $data_schedule_events = [];
+            foreach($schedule_events as $se){
+                $data_schedule_events[] = array(
+                    'event_name' => $se['event_name'],
+                    'event_desc' => $se['event_desc'],
+                    'date_start' => $se['date_start'],
+                    'date_end' => $se['date_end'],
+                    'time_start' => $se['time_start'],
+                    'time_end' => $se['time_end'],
+                    'organization' => $se['organization'],
+                    'created_at' => $se['created_at'],
+                );
+            }
+
             $url = request('url', env('FE_WEB_URL').'/room/scan/'.$room_first->id);
             $qrCode = QrCode::format('png')->size(200)->generate($url);
             $base64Image = 'data:image/png;base64,' . base64_encode($qrCode);
@@ -478,7 +525,7 @@ class RentController extends Controller
                 'date_now' => indoDate(Carbon::now()->format('Y-m-d')),
                 'room_capacity' => $room_first->room_capacity,
                 'current_event' => $current_rent,
-                'next_events' => $data_next_events
+                'next_events' => $data_schedule_events,
             );
 
             return ResponseJson::response('success', 'Success Get Current Meeting.', 200, $data);
