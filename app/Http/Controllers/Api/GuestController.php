@@ -72,9 +72,9 @@ class GuestController extends Controller
 
         DB::beginTransaction();
         try {
-            if (($date_now >= $check_rent->date_start && $date_now <= $check_rent->date_end) &&
-                ($time_now >= $check_rent->time_start && $time_now <= $check_rent->time_end)
-            ) {
+            // if (($date_now >= $check_rent->date_start && $date_now <= $check_rent->date_end) &&
+            //     ($time_now >= $check_rent->time_start && $time_now <= $check_rent->time_end)
+            // ) {
                 $signatureData = $request->signature;
                 $signatureData = strpos($signatureData, 'data:image/png;base64,') === false ? 'data:image/png;base64,' . $signatureData : $signatureData;
                 $store = new Guest();
@@ -92,9 +92,9 @@ class GuestController extends Controller
                     ]);
                 DB::commit();
                 return ResponseJson::response('success', 'Success storing guest information.', 200, null);
-            } else {
-                return ResponseJson::response('failed', 'Sorry, rental has expired.', 400, null);
-            }
+            // } else {
+            //     return ResponseJson::response('failed', 'Sorry, rental has expired.', 400, null);
+            // }
         } catch (\Exception $e) {
             DB::rollback();
             return ResponseJson::response('failed', 'Something went wrong.', 500, ['error' => $e->getMessage()]);
