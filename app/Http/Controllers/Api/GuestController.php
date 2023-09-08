@@ -28,7 +28,7 @@ class GuestController extends Controller
             'guest_phone' => 'required|string',
             'guest_position' => 'required|string',
             'work_unit' => 'required|string',
-            'signature' => 'required|image|mimes:jpeg,png|max:2048',
+            'signature' => 'required',
         ], [
             'guest_name.required' => 'Please input guest name.',
             'guest_phone.required' => 'Please input guest phone.',
@@ -75,18 +75,15 @@ class GuestController extends Controller
             if (($date_now >= $check_rent->date_start && $date_now <= $check_rent->date_end) &&
                 ($time_now >= $check_rent->time_start && $time_now <= $check_rent->time_end)
             ) {
-                $image = $request->file('signature');
-                $extension = $image->getClientOriginalExtension();
-                $filename = $request->guest_name . '_signature_' . uniqid() . '.' . $extension;
-                $image_path = $image->storeAs('signature', $filename, 'public');
-
+                $signatureData = $request->signature;
+                $signatureData = strpos($signatureData, 'data:image/png;base64,') === false ? 'data:image/png;base64,' . $signatureData : $signatureData;
                 $store = new Guest();
                 $store->rent_id = $request->rent_id;
                 $store->name = $request->guest_name;
                 $store->phone_number = $request->guest_phone;
                 $store->position = $request->guest_position;
                 $store->work_unit = $request->work_unit;
-                $store->signature = $image_path;
+                $store->signature = $signatureData;
                 $store->save();
 
                 Rent::where('id', $request->rent_id)
