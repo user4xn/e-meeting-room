@@ -320,26 +320,6 @@ class RentController extends Controller
         if (!$rent) {
             return ResponseJson::response('failed', 'Rent Not Found.', 404, null);
         }
-        // if ($request->status == "approved") {
-        //     $check_duplicate_rents = Rent::whereDate('date_start', $rent->date_start)
-        //         ->where('id', '!=', $rent->id)
-        //         ->get();
-
-        //     $data_duplicates = [];
-        //     foreach ($check_duplicate_rents as $cdr) {
-        //         if ($cdr->time_start >= $rent->time_start && $cdr->time_end <= $rent->time_end) {
-        //             // Rent::where('id', $cdr->id)
-        //             //     ->update([
-        //             //         'status' => 'rejected'
-        //             //     ]);
-        //             $data_duplicates[] = $cdr;
-        //         } else if($cdr->time_start <= $rent->time_start && $cdr->time_end >= $rent->time_end){
-        //             $data_duplicates[] = $cdr;
-        //         }
-
-        //         return $data_duplicates;
-        //     }
-        // }
         DB::beginTransaction();
         try {
             $rent->status = $request->status;
@@ -360,6 +340,27 @@ class RentController extends Controller
             $rent->verificator_user_id = Auth::user()->id;
 
             $rent->save();
+
+            if ($request->status == "approved") {
+                $check_duplicate_rents = Rent::whereDate('date_start', $rent->date_start)
+                    ->where('id', '!=', $rent->id)
+                    ->get();
+                // $data_duplicates = [];
+                foreach ($check_duplicate_rents as $cdr) {
+                    if (($cdr->time_start >= $rent->time_start && $cdr->time_start < $rent->time_end) ||
+                        ($cdr->time_end >= $rent->time_start && $cdr->time_end < $rent->time_end) ||
+                        ($cdr->time_start <= $rent->time_start && $cdr->time_end >= $rent->time_end)
+                    ) {
+                        // $data_duplicates[] = $cdr;
+                        Rent::where('id', $cdr->id)
+                            ->update([
+                                'status' => 'rejected'
+                            ]);
+                    }
+                }
+                // return $data_duplicates;
+            }
+
             DB::commit();
             return ResponseJson::response('success', 'Success Update Status Rent.', 200, null);
         } catch (\Exception $e) {
@@ -388,9 +389,9 @@ class RentController extends Controller
 
     public function delete($rent_id)
     {
-       
+
         $rent = Rent::where('id', $rent_id)
-                ->first();
+            ->first();
         if (!$rent) {
             return ResponseJson::response('failed', 'Rent Not Found.', 404, null);
         }
