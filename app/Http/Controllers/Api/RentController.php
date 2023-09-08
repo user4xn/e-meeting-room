@@ -488,7 +488,7 @@ class RentController extends Controller
             }
 
 
-            $current_rent = Rent::select('event_name', 'event_desc', 'date_start', 'time_start', 'time_end', 'guest_count', 'organization', 'created_at')
+            $current_rent = Rent::select('event_name', 'event_desc', 'date_start', 'date_end','time_start', 'time_end', 'guest_count', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {
                     $query->whereRaw("date_start = ?", $date_now)
