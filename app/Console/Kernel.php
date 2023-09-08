@@ -15,10 +15,13 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\RentExpired::class,
+        Commands\RentDone::class,
     ];
     protected function schedule(Schedule $schedule)
     {
             $schedule->command('rentexpired:cron')
+                ->everyMinute();
+            $schedule->command('rentdone:cron')
                 ->everyMinute();
     }
 
