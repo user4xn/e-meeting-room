@@ -420,7 +420,7 @@ class RentController extends Controller
             }
 
 
-            $current_rent = Rent::select('event_name', 'event_desc', 'date_start', 'time_start', 'time_end', 'guest_count', 'organization', 'created_at')
+            $current_rent = Rent::select('id as event_id', 'room_id','event_name', 'event_desc', 'date_start', 'time_start', 'time_end', 'guest_count', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {
                     $query->whereRaw("date_start = ?", $date_now)
@@ -431,7 +431,7 @@ class RentController extends Controller
                 ->orderBy('date_start', 'ASC')
                 ->first();
             $data_next_events = [];
-            $next_events = Rent::select('event_name', 'event_desc', 'date_start', 'date_end', 'time_start', 'time_end', 'organization', 'created_at')
+            $next_events = Rent::select('id as event_id', 'room_id','event_name', 'event_desc', 'date_start', 'date_end', 'time_start', 'time_end', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {
                     $query->whereRaw("date_start = ?", $date_now)
@@ -488,7 +488,7 @@ class RentController extends Controller
             }
 
 
-            $current_rent = Rent::select('event_name', 'event_desc', 'date_start', 'date_end','time_start', 'time_end', 'guest_count', 'organization', 'created_at')
+            $current_rent = Rent::select('id as event_id', 'room_id', 'event_name', 'event_desc', 'date_start', 'date_end','time_start', 'time_end', 'guest_count', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {
                     $query->whereRaw("date_start = ?", $date_now)
@@ -512,7 +512,7 @@ class RentController extends Controller
             //         'created_at' => $current_rent->created_at,
             //     );
             // }
-            $schedule_events = Rent::select('event_name', 'event_desc', 'date_start', 'date_end', 'time_start', 'time_end', 'organization', 'created_at')
+            $schedule_events = Rent::select('id as event_id', 'room_id','event_name', 'event_desc', 'date_start', 'date_end', 'time_start', 'time_end', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {
                     $query->whereRaw("CONCAT(date_start, ' ', time_start) >= ?", $datetime_now);
