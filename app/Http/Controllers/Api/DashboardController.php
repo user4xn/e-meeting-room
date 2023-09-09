@@ -55,7 +55,7 @@ class DashboardController extends Controller
                 return [
                     'event_name' => $event->event_name,
                     'user_responsible' => $event->user_responsible,
-                    'email' => $event->email,
+                    'user_email' => $event->email,
                     'room_name' => $event->room_name,
                     'room_capacity' => $event->room_capacity,
                     'guest_count' => $event->guest_count,
