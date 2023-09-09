@@ -10,6 +10,7 @@ use App\Models\Guest;
 use App\Models\ReportImageRent;
 use PDF;
 use Carbon\Carbon;
+use DataTables;
 class ReportController extends Controller
 {
     public function storeBulkImage(Request $request, $rent_id)
@@ -37,10 +38,12 @@ class ReportController extends Controller
         return ResponseJson::response('success', 'Success Report Rent.', 201, null); 
     }
 
-    public function listReportRent()
+    public function listReportRentHistory()
     {
         try{
-            $fetch = Rent::get()->toArray();
+            $fetch = Rent::whereIn('status', ['approved', 'done'])
+                ->get()
+                ->toArray();
 
             $i = 0;
             $reform = array_map(function($new) use (&$i) { 
@@ -62,7 +65,56 @@ class ReportController extends Controller
                     'status' => $new['status']
                 ]; 
             }, $fetch);
-            return ResponseJson::response('success', 'Success Get List Calendar.', 200, $reform); 
+            $datatables =  DataTables::of($reform)->make(true);
+            $data = array(
+                'draw' => $datatables->original['draw'],
+                'recordsTotal' => $datatables->original['recordsTotal'],
+                'recordsFiltered' => $datatables->original['recordsFiltered'],
+                'data' => $datatables->original['data']
+            );
+            return ResponseJson::response('success', 'Success Get List Room.', 200, $data); 
+
+        }catch(\Exception $e){
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
+        }
+    }
+
+    public function listReportRentOngoing()
+    {
+        try{
+            $fetch = Rent::whereIn('status', ['approved', 'done'])
+                ->whereDate('date_start', Carbon::now()->format('Y-m-d'))
+                ->get()
+                ->toArray();
+
+            $i = 0;
+            $reform = array_map(function($new) use (&$i) { 
+                $i++;
+                $check_file = ReportImageRent::where('rent_id', $new['id'])
+                    ->select('id')
+                    ->first();
+                $total_guest = Guest::where('rent_id', $new['id'])
+                    ->count();
+                return [
+                    'id' => $new['id'],
+                    'event_name' => $new['event_name'],
+                    'have_files' => $check_file ? true : false,
+                    'date_start' => $new['date_start'],
+                    'date_end' => $new['date_end'],
+                    'time_start' => $new['time_start'],
+                    'time_end' => $new['time_end'],
+                    'total_guest' => $total_guest,
+                    'status' => $new['status']
+                ]; 
+            }, $fetch);
+            $datatables =  DataTables::of($reform)->make(true);
+            $data = array(
+                'draw' => $datatables->original['draw'],
+                'recordsTotal' => $datatables->original['recordsTotal'],
+                'recordsFiltered' => $datatables->original['recordsFiltered'],
+                'data' => $datatables->original['data']
+            );
+            return ResponseJson::response('success', 'Success Get List Room.', 200, $data); 
 
         }catch(\Exception $e){
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
@@ -92,6 +144,26 @@ class ReportController extends Controller
         }catch(\Exception $e){
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
         }
+    }
+
+    public function listGuestByRent($rent_id)
+    {
+        $check_rent = Rent::join('user_details as ud', 'ud.user_id', '=', 'rents.user_id')
+            ->first();
+        if(!$check_rent){
+            return ResponseJson::response('failed', 'Data Rent Not Found.', 404, null); 
+        }
+        $guests = Guest::where('rent_id', $rent_id)
+            ->select('name', 'signature')
+            ->get()
+            ->toArray();
+        $data = array(
+            "user_responsible" => $check_rent->name,
+            "nip_responsible" => $check_rent->nip,
+            'list_guests' => $guests,
+        );
+
+        return ResponseJson::response('success', 'Success Get List Guest.', 200, $data); 
     }
 
     public function listReportRentPdf()
