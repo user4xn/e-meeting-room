@@ -87,7 +87,7 @@ class RentController extends Controller
     public function listCalendar()
     {
         try {
-            $fetch = Rent::whereIn('status', ['approved', 'unapproved', 'expired'])
+            $fetch = Rent::whereIn('status', ['approved', 'unapproved', 'done','expired'])
                 ->get()
                 ->toArray();
 
@@ -102,7 +102,7 @@ class RentController extends Controller
                     'end' => $new['date_end'] . ' ' . $new['time_end'],
                     'allDay' => $new['is_all_day'] == 1 ? true : false,
                     'extendedProps' => array(
-                        'calendar' => ($new['status'] == "approved") ? $new['organization'] : ucwords($new['status'])
+                        'calendar' => ($new['status'] == "approved" || $new['status'] == "done") ? $new['organization'] : ucwords($new['status'])
                     )
                 ];
             }, $fetch);
@@ -320,10 +320,31 @@ class RentController extends Controller
         if (!$rent) {
             return ResponseJson::response('failed', 'Rent Not Found.', 404, null);
         }
+        if ($request->status == "approved") {
+            $check_rent_approved = Rent::where(function($query) use ($rent) {
+                $query->where(function($subquery) use ($rent) {
+                    $subquery->where('time_start', '>=', $rent->time_start)
+                        ->where('time_start', '<', $rent->time_end);
+                })
+                ->orWhere(function($subquery) use ($rent) {
+                    $subquery->where('time_end', '>=', $rent->time_start)
+                        ->where('time_end', '<', $rent->time_end);
+                })
+                ->orWhere(function($subquery) use ($rent) {
+                    $subquery->where('time_start', '<=', $rent->time_start)
+                        ->where('time_end', '>=', $rent->time_end);
+                });
+            })
+            ->where('status', 'approved')
+            ->first();
+            if($check_rent_approved){
+                return ResponseJson::response('failed', 'Sorry, the same event has been approved.', 400, null);
+            }
+        }
         DB::beginTransaction();
         try {
+            
             $rent->status = $request->status;
-
             if ($request->status == 'rejected') {
                 $validator = Validator::make($request->all(), [
                     'notes' => 'required',
@@ -338,27 +359,33 @@ class RentController extends Controller
                 $rent->notes = $request->notes;
             }
             $rent->verificator_user_id = Auth::user()->id;
-
             $rent->save();
 
             if ($request->status == "approved") {
-                $check_duplicate_rents = Rent::whereDate('date_start', $rent->date_start)
+                $check_duplicate = Rent::where(function($query) use ($rent) {
+                        $query->where(function($subquery) use ($rent) {
+                            $subquery->where('time_start', '>=', $rent->time_start)
+                                ->where('time_start', '<', $rent->time_end);
+                        })
+                        ->orWhere(function($subquery) use ($rent) {
+                            $subquery->where('time_end', '>=', $rent->time_start)
+                                ->where('time_end', '<', $rent->time_end);
+                        })
+                        ->orWhere(function($subquery) use ($rent) {
+                            $subquery->where('time_start', '<=', $rent->time_start)
+                                ->where('time_end', '>=', $rent->time_end);
+                        });
+                    })
+                    ->whereDate('date_start', $rent->date_start)
+                    ->whereDate('date_end', $rent->date_end)
                     ->where('id', '!=', $rent->id)
                     ->get();
-                // $data_duplicates = [];
-                foreach ($check_duplicate_rents as $cdr) {
-                    if (($cdr->time_start >= $rent->time_start && $cdr->time_start < $rent->time_end) ||
-                        ($cdr->time_end >= $rent->time_start && $cdr->time_end < $rent->time_end) ||
-                        ($cdr->time_start <= $rent->time_start && $cdr->time_end >= $rent->time_end)
-                    ) {
-                        // $data_duplicates[] = $cdr;
-                        Rent::where('id', $cdr->id)
-                            ->update([
-                                'status' => 'rejected'
-                            ]);
-                    }
+                foreach ($check_duplicate as $cdr) {
+                    Rent::where('id', $cdr->id)
+                        ->update([
+                            'status' => 'rejected'
+                        ]);
                 }
-                // return $data_duplicates;
             }
 
             DB::commit();

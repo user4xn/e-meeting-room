@@ -20,6 +20,7 @@ class GuestController extends Controller
     public function store(Request $request)
     {
         $date_now = Carbon::now()->format('Y-m-d');
+        $datetime_now = Carbon::now()->format('Y-m-d H:i:s');
         $time_now = Carbon::now()->format('H:i:s');
 
         $validator = Validator::make($request->all(), [
@@ -43,6 +44,11 @@ class GuestController extends Controller
 
         $check_rent = Rent::where('id', $request->rent_id)
             ->where('status', 'approved')
+            ->where(function ($query) use ($datetime_now, $date_now) {
+                $query->whereRaw("date_start = ?", $date_now)
+                    ->whereRaw("CONCAT(date_start, ' ', time_start) <= ?", $datetime_now)
+                    ->whereRaw("CONCAT(date_end, ' ', time_end) >= ?", $datetime_now);
+            })
             ->select('id', 'room_id', 'guest_count','date_start', 'date_end', 'time_start', 'time_end')
             ->first();
 
@@ -72,29 +78,24 @@ class GuestController extends Controller
 
         DB::beginTransaction();
         try {
-            // if (($date_now >= $check_rent->date_start && $date_now <= $check_rent->date_end) &&
-            //     ($time_now >= $check_rent->time_start && $time_now <= $check_rent->time_end)
-            // ) {
-                $signatureData = $request->signature;
-                $signatureData = strpos($signatureData, 'data:image/png;base64,') === false ? 'data:image/png;base64,' . $signatureData : $signatureData;
-                $store = new Guest();
-                $store->rent_id = $request->rent_id;
-                $store->name = $request->guest_name;
-                $store->phone_number = $request->guest_phone;
-                $store->position = $request->guest_position;
-                $store->work_unit = $request->work_unit;
-                $store->signature = $signatureData;
-                $store->save();
+            $signatureData = $request->signature;
+            $signatureData = strpos($signatureData, 'data:image/png;base64,') === false ? 'data:image/png;base64,' . $signatureData : $signatureData;
+            $store = new Guest();
+            $store->rent_id = $request->rent_id;
+            $store->name = $request->guest_name;
+            $store->phone_number = $request->guest_phone;
+            $store->position = $request->guest_position;
+            $store->work_unit = $request->work_unit;
+            $store->signature = $signatureData;
+            $store->save();
 
-                Rent::where('id', $request->rent_id)
-                    ->update([
-                        'guest_count' => $total_guest
-                    ]);
-                DB::commit();
-                return ResponseJson::response('success', 'Success storing guest information.', 200, null);
-            // } else {
-            //     return ResponseJson::response('failed', 'Sorry, rental has expired.', 400, null);
-            // }
+            Rent::where('id', $request->rent_id)
+                ->update([
+                    'guest_count' => $total_guest
+                ]);
+            DB::commit();
+            return ResponseJson::response('success', 'Success storing guest information.', 200, null);
+
         } catch (\Exception $e) {
             DB::rollback();
             return ResponseJson::response('failed', 'Something went wrong.', 500, ['error' => $e->getMessage()]);

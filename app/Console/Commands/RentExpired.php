@@ -31,8 +31,8 @@ class RentExpired extends Command
             ->get();
         $datetime_now = Carbon::now()->format('Y-m-d H:i:s');
         foreach($rents as $rent){
-            $datetime_end = $rent->date_end.' '.$rent->time_end;
-            if($datetime_now >= $datetime_end){
+            $datetime_start = $rent->date_start.' '.$rent->time_start;
+            if($datetime_now >= $datetime_start){
                 Rent::where('id', $rent->id)
                     ->update([
                         'status' => 'expired'
