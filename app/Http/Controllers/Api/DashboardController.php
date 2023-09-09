@@ -35,20 +35,30 @@ class DashboardController extends Controller
             ->toArray();
         $todayEvents = Rent::join('master_rooms as mr', 'mr.id', '=', 'rents.room_id')
             ->join('user_details as udr', 'udr.user_id', '=', 'rents.user_id')
+            ->join('users as u', 'u.id', '=', 'rents.user_id')
             ->whereDate('date_start', $todayDate)
-            ->whereIn('status', ['approved', 'done'])
-            ->select('udr.name as user_responsible', 'mr.room_name', 'room_capacity', 'status', 'date_start', 'date_end', 'time_start', 'time_end')
+            ->whereIn('rents.status', ['approved', 'done'])
+            ->select('event_name', 'udr.name as user_responsible', 'u.email', 'mr.room_name', 'room_capacity', 'guest_count', 'rents.status', 'date_start', 'date_end', 'time_start', 'time_end')
             ->get()
             ->map(function ($event) use ($dateNow) {
-                $status = ($event->date_start <= $dateNow && $event->date_end >= $dateNow) ? 'ongoing' : 'waiting';
-                if ($event->status === 'done') {
+                $eventStartTime = $event->date_start . ' ' . $event->time_start;
+                $eventEndTime = $event->date_end . ' ' . $event->time_end;
+        
+                if ($eventStartTime <= $dateNow && $eventEndTime >= $dateNow) {
+                    $status = 'ongoing';
+                } elseif ($event->status === 'done') {
                     $status = 'completed';
+                } else {
+                    $status = 'waiting';
                 }
-
+        
                 return [
+                    'event_name' => $event->event_name,
                     'user_responsible' => $event->user_responsible,
+                    'email' => $event->email,
                     'room_name' => $event->room_name,
                     'room_capacity' => $event->room_capacity,
+                    'guest_count' => $event->guest_count,
                     'date_start' => $event->date_start,
                     'date_end' => $event->date_end,
                     'status' => $status,
