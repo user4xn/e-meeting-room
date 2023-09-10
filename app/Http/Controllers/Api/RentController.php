@@ -457,9 +457,17 @@ class RentController extends Controller
             $current_rent = Rent::select('id as event_id', 'room_id','event_name', 'event_desc', 'date_start', 'time_start', 'time_end', 'guest_count', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {
-                    $query->whereRaw("date_start = ?", $date_now)
-                        ->whereRaw("CONCAT(date_start, ' ', time_start) <= ?", $datetime_now)
-                        ->whereRaw("CONCAT(date_end, ' ', time_end) >= ?", $datetime_now);
+                    $query->where('status', 'approved')
+                        ->where(function ($query) use ($datetime_now, $date_now) {
+                            $query->where(function ($query) use ($date_now, $datetime_now) {
+                                $query->where('date_start', '=', $date_now)
+                                    ->whereRaw("CONCAT(date_start, ' ', time_start) <= ?", $datetime_now);
+                            })
+                            ->orWhere(function ($query) use ($date_now, $datetime_now) {
+                                $query->where('date_start', '<', $date_now)
+                                    ->where('date_end', '>=', $date_now);
+                            });
+                        });
                 })
                 ->where('status', 'approved')
                 ->orderBy('date_start', 'ASC')
