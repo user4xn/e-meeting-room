@@ -44,8 +44,9 @@ class ReportController extends Controller
             $fetch = Rent::whereIn('rents.status', ['done'])
                 ->join('user_details as ud', 'ud.user_id', '=', 'rents.user_id')
                 ->join('users as u', 'u.id', '=', 'rents.user_id')
+                ->join('master_rooms as mr', 'mr.id', '=', 'rents.room_id')
                 ->select('rents.id','u.email as user_email', 'ud.name as user_responsible', 'ud.phone_number as user_phone', 
-                    'event_name', 'date_start', 'date_end', 'time_start', 'time_end', 'rents.status')
+                    'event_name', 'date_start', 'date_end', 'time_start', 'time_end', 'rents.status', 'room_capacity')
                 ->get()
                 ->toArray();
 
@@ -70,7 +71,8 @@ class ReportController extends Controller
                     'time_start' => $new['time_start'],
                     'time_end' => $new['time_end'],
                     'total_guest' => $total_guest,
-                    'status' => $new['status']
+                    'status' => $new['status'],
+                    'room_capacity' => $new['room_capacity']
                 ]; 
             }, $fetch);
             $datatables =  DataTables::of($reform)->make(true);
@@ -97,8 +99,9 @@ class ReportController extends Controller
                 })
                 ->join('user_details as ud', 'ud.user_id', '=', 'rents.user_id')
                 ->join('users as u', 'u.id', '=', 'rents.user_id')
+                ->join('master_rooms as mr', 'mr.id', '=', 'rents.room_id')
                 ->select('rents.id', 'u.email as user_email', 'ud.name as user_responsible', 'ud.phone_number as user_phone',
-                    'event_name', 'date_start', 'date_end', 'time_start', 'time_end', 'rents.status')
+                    'event_name', 'date_start', 'date_end', 'time_start', 'time_end', 'rents.status', 'room_capacity')
                 ->get()
                 ->toArray();
 
@@ -123,7 +126,8 @@ class ReportController extends Controller
                     'time_start' => $new['time_start'],
                     'time_end' => $new['time_end'],
                     'total_guest' => $total_guest,
-                    'status' => $new['status']
+                    'status' => $new['status'],
+                    'room_capacity' => $new['room_capacity']
                 ]; 
             }, $fetch);
             $datatables =  DataTables::of($reform)->make(true);
