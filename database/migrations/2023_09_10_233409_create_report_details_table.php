@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('report_details', function (Blueprint $table) {
             $table->id();
             $table->integer('report_id');
-            $table->string('notes');
+            $table->string('notes')->nullable();
             $table->string('path');
             $table->enum('type', ['image', 'doc']);
             $table->timestamps();
