@@ -25,12 +25,14 @@ class GuestController extends Controller
 
         $validator = Validator::make($request->all(), [
             'rent_id' => 'required|numeric',
+            'guest_uuid' => 'required',
             'guest_name' => 'required|string',
             'guest_phone' => 'required|string',
             'guest_position' => 'required|string',
             'work_unit' => 'required|string',
             'signature' => 'required',
         ], [
+            'guest_uuid.required' => 'Please input guest uuid.',
             'guest_name.required' => 'Please input guest name.',
             'guest_phone.required' => 'Please input guest phone.',
             'guest_position.required' => 'Please input guest position.',
@@ -43,17 +45,25 @@ class GuestController extends Controller
         }
 
         $check_rent = Rent::where('id', $request->rent_id)
-            ->where('status', 'approved')
             ->where(function ($query) use ($datetime_now, $date_now) {
-                $query->whereRaw("date_start = ?", $date_now)
-                    ->whereRaw("CONCAT(date_start, ' ', time_start) <= ?", $datetime_now)
-                    ->whereRaw("CONCAT(date_end, ' ', time_end) >= ?", $datetime_now);
+                $query->where('status', 'approved')
+                    ->where(function ($query) use ($datetime_now, $date_now) {
+                        $query->where(function ($query) use ($date_now, $datetime_now) {
+                            $query->where('date_start', '=', $date_now)
+                                ->whereRaw("CONCAT(date_start, ' ', time_start) <= ?", $datetime_now);
+                        })
+                        ->orWhere(function ($query) use ($date_now, $datetime_now) {
+                            $query->where('date_start', '<', $date_now)
+                                ->where('date_end', '>=', $date_now);
+                        });
+                    });
             })
             ->select('id', 'room_id', 'guest_count','date_start', 'date_end', 'time_start', 'time_end')
             ->first();
 
         $check_guest = Guest::where('name', $request->guest_name)
-            ->orWhere('phone_number', $request->guest_phone)
+            ->Where('uuid', $request->guest_uuid)
+            ->Where('phone_number', $request->guest_phone)
             ->where('rent_id', $request->rent_id)
             ->select('id')
             ->first();
@@ -82,6 +92,7 @@ class GuestController extends Controller
             $signatureData = strpos($signatureData, 'data:image/png;base64,') === false ? 'data:image/png;base64,' . $signatureData : $signatureData;
             $store = new Guest();
             $store->rent_id = $request->rent_id;
+            $store->uuid = $request->guest_uuid;
             $store->name = $request->guest_name;
             $store->phone_number = $request->guest_phone;
             $store->position = $request->guest_position;
