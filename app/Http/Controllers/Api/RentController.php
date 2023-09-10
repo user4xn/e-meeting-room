@@ -380,11 +380,18 @@ class RentController extends Controller
                     ->whereDate('date_end', $rent->date_end)
                     ->where('id', '!=', $rent->id)
                     ->get();
-                foreach ($check_duplicate as $cdr) {
-                    Rent::where('id', $cdr->id)
-                        ->update([
-                            'status' => 'rejected'
-                        ]);
+                $data_duplicates = [];
+                foreach($check_duplicate as $dd) {
+                    $data_duplicates[] = array(
+                        'event_name' => $dd->event_name,
+                        'date_start' => $dd->date_start,
+                        'date_end' => $dd->date_end,
+                        'time_start' => $dd->time_start,
+                        'time_end' => $dd->time_end
+                    );
+                }
+                if(count($data_duplicates) > 1){
+                    return ResponseJson::response('failed', 400,'Maaf ada data duplicate, silahkan check kembali.', $data_duplicates);
                 }
             }
 
@@ -514,31 +521,25 @@ class RentController extends Controller
                 return ResponseJson::response('failed', 'Master Room Not Found.', 404, null);
             }
 
-
-            $current_rent = Rent::select('id as event_id', 'room_id', 'event_name', 'event_desc', 'date_start', 'date_end','time_start', 'time_end', 'guest_count', 'organization', 'created_at')
+            $current_rent = Rent::select('id as event_id', 'room_id', 'event_name', 'event_desc', 'date_start', 'date_end', 'time_start', 'time_end', 'guest_count', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {
-                    $query->whereRaw("date_start = ?", $date_now)
-                        ->whereRaw("CONCAT(date_start, ' ', time_start) <= ?", $datetime_now)
-                        ->whereRaw("CONCAT(date_end, ' ', time_end) >= ?", $datetime_now);
+                    $query->where('status', 'approved')
+                        ->where(function ($query) use ($datetime_now, $date_now) {
+                            $query->where(function ($query) use ($date_now, $datetime_now) {
+                                $query->where('date_start', '=', $date_now)
+                                    ->whereRaw("CONCAT(date_start, ' ', time_start) <= ?", $datetime_now);
+                            })
+                            ->orWhere(function ($query) use ($date_now, $datetime_now) {
+                                $query->where('date_start', '<', $date_now)
+                                    ->where('date_end', '>=', $date_now);
+                            });
+                        });
                 })
-                ->where('status', 'approved')
                 ->orderBy('date_start', 'ASC')
                 ->first();
 
             $data_schedule_events = [];
-            // if($current_rent){
-            //     $data_schedule_events[] = array(
-            //         'event_name' => $current_rent->event_name,
-            //         'event_desc' => $current_rent->event_desc,
-            //         'date_start' => $current_rent->date_start,
-            //         'date_end' => $current_rent->date_end,
-            //         'time_start' => $current_rent->time_start,
-            //         'time_end' => $current_rent->time_end,
-            //         'organization' => $current_rent->organization,
-            //         'created_at' => $current_rent->created_at,
-            //     );
-            // }
             $schedule_events = Rent::select('id as event_id', 'room_id','event_name', 'event_desc', 'date_start', 'date_end', 'time_start', 'time_end', 'organization', 'created_at')
                 ->where('room_id', $room_id)
                 ->where(function ($query) use ($datetime_now, $date_now) {

@@ -38,10 +38,14 @@ class ReportController extends Controller
         return ResponseJson::response('success', 'Success Report Rent.', 201, null); 
     }
 
-    public function listReportRentHistory()
+    public function listParticipantRentHistory()
     {
         try{
-            $fetch = Rent::whereIn('status', ['approved', 'done'])
+            $fetch = Rent::whereIn('rents.status', ['done'])
+                ->join('user_details as ud', 'ud.user_id', '=', 'rents.id')
+                ->join('users as u', 'u.id', '=', 'rents.user_id')
+                ->select('rents.id','u.email as user_email', 'ud.name as user_responsible', 'ud.phone_number as user_phone', 
+                    'event_name', 'date_start', 'date_end', 'time_start', 'time_end', 'rents.status')
                 ->get()
                 ->toArray();
 
@@ -55,6 +59,9 @@ class ReportController extends Controller
                     ->count();
                 return [
                     'id' => $new['id'],
+                    'user_email' => $new['user_email'],
+                    'user_responsible' => $new['user_responsible'],
+                    'user_phone' => $new['user_phone'],
                     'event_name' => $new['event_name'],
                     'have_files' => $check_file ? true : false,
                     'date_start' => $new['date_start'],
@@ -79,11 +86,15 @@ class ReportController extends Controller
         }
     }
 
-    public function listReportRentOngoing()
+    public function listParticipantRentOngoing()
     {
         try{
-            $fetch = Rent::whereIn('status', ['approved', 'done'])
+            $fetch = Rent::whereIn('rents.status', ['approved', 'done'])
                 ->whereDate('date_start', Carbon::now()->format('Y-m-d'))
+                ->join('user_details as ud', 'ud.user_id', '=', 'rents.id')
+                ->join('users as u', 'u.id', '=', 'rents.user_id')
+                ->select('rents.id','u.email as user_email', 'ud.name as user_responsible', 'ud.phone_number as user_phone', 
+                    'event_name', 'date_start', 'date_end', 'time_start', 'time_end', 'rents.status')
                 ->get()
                 ->toArray();
 
@@ -97,6 +108,9 @@ class ReportController extends Controller
                     ->count();
                 return [
                     'id' => $new['id'],
+                    'user_email' => $new['user_email'],
+                    'user_responsible' => $new['user_responsible'],
+                    'user_phone' => $new['user_phone'],
                     'event_name' => $new['event_name'],
                     'have_files' => $check_file ? true : false,
                     'date_start' => $new['date_start'],
@@ -120,7 +134,53 @@ class ReportController extends Controller
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
         }
     }
+    public function listRentReport()
+    {
+        try{
+            $fetch = Rent::whereIn('rents.status', ['done'])
+                ->join('user_details as ud', 'ud.user_id', '=', 'rents.id')
+                ->join('users as u', 'u.id', '=', 'rents.user_id')
+                ->select('rents.id','u.email as user_email', 'ud.name as user_responsible', 'ud.phone_number as user_phone', 
+                    'event_name', 'date_start', 'date_end', 'time_start', 'time_end', 'rents.status')
+                ->get()
+                ->toArray();
 
+            $i = 0;
+            $reform = array_map(function($new) use (&$i) { 
+                $i++;
+                $check_file = ReportImageRent::where('rent_id', $new['id'])
+                    ->select('id')
+                    ->first();
+                $total_guest = Guest::where('rent_id', $new['id'])
+                    ->count();
+                return [
+                    'id' => $new['id'],
+                    'user_email' => $new['user_email'],
+                    'user_responsible' => $new['user_responsible'],
+                    'user_phone' => $new['user_phone'],
+                    'event_name' => $new['event_name'],
+                    'have_files' => $check_file ? true : false,
+                    'date_start' => $new['date_start'],
+                    'date_end' => $new['date_end'],
+                    'time_start' => $new['time_start'],
+                    'time_end' => $new['time_end'],
+                    'total_guest' => $total_guest,
+                    'status' => $new['status']
+                ]; 
+            }, $fetch);
+            $datatables =  DataTables::of($reform)->make(true);
+            $data = array(
+                'draw' => $datatables->original['draw'],
+                'recordsTotal' => $datatables->original['recordsTotal'],
+                'recordsFiltered' => $datatables->original['recordsFiltered'],
+                'data' => $datatables->original['data']
+            );
+            return ResponseJson::response('success', 'Success Get List Room.', 200, $data); 
+
+        }catch(\Exception $e){
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
+        }
+    }
     public function detailReportRent($rent_id)
     {
         try{

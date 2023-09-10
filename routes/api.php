@@ -64,10 +64,14 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     });
     $router->group(['prefix' => 'v1/report'], function ($router) {
         $router->post('/store-bulk-image/{rent_id}', [ReportController::class, 'storeBulkImage']);
-        $router->get('/list-rent/ongoing', [ReportController::class, 'listReportRentOngoing']);
-        $router->get('/list-rent/history', [ReportController::class, 'listReportRentHistory']);
+        $router->get('/list-rent', [ReportController::class, 'listRentReport']);
         $router->get('/list-guest/{rent_id}', [ReportController::class, 'listGuestByRent']);
         $router->get('/list-rent/pdf', [ReportController::class, 'listReportRentPdf']);
         $router->get('/detail/rent/{id}', [ReportController::class, 'detailReportRent']);
+    });
+    $router->group(['prefix' => 'v1/participant'], function ($router) {
+        $router->get('/list-rent/ongoing', [ReportController::class, 'listParticipantRentOngoing']);
+        $router->get('/list-rent/history', [ReportController::class, 'listParticipantRentHistory']);
+        $router->get('/list-guest/{rent_id}', [ReportController::class, 'listGuestByRent']);
     });
 });

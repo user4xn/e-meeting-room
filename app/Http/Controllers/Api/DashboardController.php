@@ -36,7 +36,14 @@ class DashboardController extends Controller
         $todayEvents = Rent::join('master_rooms as mr', 'mr.id', '=', 'rents.room_id')
             ->join('user_details as udr', 'udr.user_id', '=', 'rents.user_id')
             ->join('users as u', 'u.id', '=', 'rents.user_id')
-            ->whereDate('date_start', $todayDate)
+            ->where(function($query) use ($todayDate, $dateNow) {
+                $query->whereBetween('date_start', [$todayDate, $dateNow])
+                    ->orWhereBetween('date_end', [$todayDate, $dateNow])
+                    ->orWhere(function($query) use ($todayDate, $dateNow) {
+                        $query->where('date_start', '<', $todayDate)
+                            ->where('date_end', '>', $dateNow);
+                    });
+            })
             ->whereIn('rents.status', ['approved', 'done'])
             ->select('event_name', 'udr.name as user_responsible', 'u.email', 'mr.room_name', 'room_capacity', 'guest_count', 'rents.status', 'date_start', 'date_end', 'time_start', 'time_end')
             ->get()
@@ -66,7 +73,7 @@ class DashboardController extends Controller
                     'time_end' => $event->time_end,
                 ];
             });
-
+        
         $data = [
             'statistic' => $statistic,
             'nearly_expired' => $expiredRentals,
