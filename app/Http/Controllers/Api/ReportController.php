@@ -90,10 +90,13 @@ class ReportController extends Controller
     {
         try{
             $fetch = Rent::whereIn('rents.status', ['approved', 'done'])
-                ->whereDate('date_start', Carbon::now()->format('Y-m-d'))
-                ->join('user_details as ud', 'ud.user_id', '=', 'rents.id')
+                ->where(function ($query) {
+                    $query->whereDate('date_start', '<=', Carbon::now())
+                        ->whereDate('date_end', '>=', Carbon::now());
+                })
+                ->join('user_details as ud', 'ud.user_id', '=', 'rents.user_id')
                 ->join('users as u', 'u.id', '=', 'rents.user_id')
-                ->select('rents.id','u.email as user_email', 'ud.name as user_responsible', 'ud.phone_number as user_phone', 
+                ->select('rents.id', 'u.email as user_email', 'ud.name as user_responsible', 'ud.phone_number as user_phone',
                     'event_name', 'date_start', 'date_end', 'time_start', 'time_end', 'rents.status')
                 ->get()
                 ->toArray();
