@@ -46,7 +46,7 @@ class ReportController extends Controller
                 ->join('users as u', 'u.id', '=', 'rents.user_id')
                 ->join('master_rooms as mr', 'mr.id', '=', 'rents.room_id')
                 ->select('rents.id','u.email as user_email', 'ud.name as user_responsible', 'ud.phone_number as user_phone', 
-                    'event_name', 'date_start', 'date_end', 'time_start', 'time_end', 'rents.status', 'room_capacity')
+                    'event_name', 'date_start', 'date_end', 'time_start', 'time_end', 'rents.status', 'room_capacity', 'room_name')
                 ->get()
                 ->toArray();
 
@@ -72,6 +72,7 @@ class ReportController extends Controller
                     'time_end' => $new['time_end'],
                     'total_guest' => $total_guest,
                     'status' => $new['status'],
+                    'room_name' => $new['room_name'],
                     'room_capacity' => $new['room_capacity']
                 ]; 
             }, $fetch);
@@ -101,7 +102,7 @@ class ReportController extends Controller
                 ->join('users as u', 'u.id', '=', 'rents.user_id')
                 ->join('master_rooms as mr', 'mr.id', '=', 'rents.room_id')
                 ->select('rents.id', 'u.email as user_email', 'ud.name as user_responsible', 'ud.phone_number as user_phone',
-                    'event_name', 'date_start', 'date_end', 'time_start', 'time_end', 'rents.status', 'room_capacity')
+                    'event_name', 'date_start', 'date_end', 'time_start', 'time_end', 'rents.status', 'room_capacity', 'room_name')
                 ->get()
                 ->toArray();
 
@@ -127,7 +128,8 @@ class ReportController extends Controller
                     'time_end' => $new['time_end'],
                     'total_guest' => $total_guest,
                     'status' => $new['status'],
-                    'room_capacity' => $new['room_capacity']
+                    'room_name' => $new['room_name'],
+                    'room_capacity' => $new['room_capacity'],
                 ]; 
             }, $fetch);
             $datatables =  DataTables::of($reform)->make(true);
