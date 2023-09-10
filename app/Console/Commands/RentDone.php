@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Rent;
+use App\Models\Report;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -37,6 +38,10 @@ class RentDone extends Command
                     ->update([
                         'status' => 'done'
                     ]);
+                $store_report = new Report();
+                $store_report->rent_id = $rent->id;
+                $store_report->date_report = Carbon::now()->format('Y-m-d');
+                $store_report->save();
             }
         }
     }

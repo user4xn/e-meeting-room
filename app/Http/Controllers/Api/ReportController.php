@@ -220,7 +220,7 @@ class ReportController extends Controller
             return ResponseJson::response('failed', 'Data Rent Not Found.', 404, null); 
         }
         $guests = Guest::where('rent_id', $rent_id)
-            ->select('name', 'signature')
+            ->select('name', 'phone_number', 'position', 'work_unit','signature')
             ->get()
             ->toArray();
         $data = array(
