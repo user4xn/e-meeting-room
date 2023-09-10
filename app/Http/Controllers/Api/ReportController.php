@@ -111,7 +111,7 @@ class ReportController extends Controller
                 $total_guest = Guest::where('rent_id', $new['id'])
                     ->count();
                 return [
-                    'id' => $i.'.',
+                    'no' => $i.'.',
                     'id' => $new['id'],
                     'user_email' => $new['user_email'],
                     'user_responsible' => $new['user_responsible'],
