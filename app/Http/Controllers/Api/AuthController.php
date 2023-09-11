@@ -126,14 +126,14 @@ class AuthController extends Controller
             ->select('id')
             ->first();
         if (!$check) {
-            Mail::to($email)->send(new EmailOtpLogin($user_id));
-            return "new ip";
-        } else {
             $log = new UserLog();
             $log->user_id = Auth::user()->id;
             $log->ip_address = $ipAddress;
             $log->user_agent = $request->header('User-Agent');
             $log->save();
+            // Mail::to($email)->send(new EmailOtpLogin($user_id));
+            return "new ip";
+        } else {
             return "existing ip";
         }
     }
