@@ -213,7 +213,8 @@ class ReportController extends Controller
                     'time_start' => $new['time_start'],
                     'time_end' => $new['time_end'],
                     'total_guest' => $total_guest,
-                    'status' => $new['status']
+                    'status' => $new['status'],
+                    'event_organization' => ($new['status'] == "approved" || $new['status'] == "done") ? $new['organization'] : ucwords($new['status'])
                 ];
             }, $fetch);
             $datatables =  DataTables::of($reform)->make(true);
