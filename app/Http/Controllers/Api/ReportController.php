@@ -325,6 +325,12 @@ class ReportController extends Controller
         if (!$check_rent) {
             return ResponseJson::response('success', 'Data Rent Not Found.', 400, null);
         }
+        $check_report = Report::where('rent_id', $rent_id)
+            ->select('id')
+            ->first();
+        if (!$check_report) {
+            return ResponseJson::response('success', 'Data Report Not Found.', 400, null);
+        }
         $rent_name = str_replace(' ', '_', strtolower($check_rent->event_name));
         if ($request->hasFile('files')) {
             foreach ($request->file('files') as $image) {
@@ -333,7 +339,7 @@ class ReportController extends Controller
                 $imageName = $rent_name . '_' . time() . '.' . $image->getClientOriginalExtension();
                 $image->storeAs('report/rent', $imageName, 'public');
                 $path = '/report/rent/' . $imageName;
-                $check_report = Report::select('id')->first();
+                
                 $report = new ReportDetail();
                 $report->report_id = $check_report->id;
                 $report->path = $path;
