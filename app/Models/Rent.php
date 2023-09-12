@@ -13,6 +13,21 @@ class Rent extends Model
     {
         return $this->hasOne('App\Models\MasterRoom', 'id', 'room_id');
     }
+
+    public function UserResponsible()
+    {
+        return $this->hasOne(UserDetail::class, 'user_id','user_id');
+    }
+
+    public function UserVerificator()
+    {
+        return $this->hasOne(UserDetail::class, 'user_id','verificator_user_id');
+    }
+
+    public function Report()
+    {
+        return $this->hasOne(Report::class, 'rent_id','id');
+    }
     
     public function getCreatedAtAttribute($value)
     {

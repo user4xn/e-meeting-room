@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseJson;
+use App\Models\LogApproval;
 use App\Models\LogRent;
 use App\Models\MasterRoom;
 use App\Models\Rent;
@@ -361,6 +362,13 @@ class RentController extends Controller
             $rent->verificator_user_id = Auth::user()->id;
             $rent->save();
 
+            $log_approval = new LogApproval();
+            $log_approval->rent_id = $id;
+            $log_approval->user_id = Auth::user()->id;
+            $log_approval->status = $request->status;
+            $log_approval->save();
+
+            $data_duplicates = [];
             if ($request->status == "approved") {
                 $check_duplicate = Rent::where(function($query) use ($rent) {
                         $query->where(function($subquery) use ($rent) {
@@ -380,7 +388,6 @@ class RentController extends Controller
                     ->whereDate('date_end', $rent->date_end)
                     ->where('id', '!=', $rent->id)
                     ->get();
-                $data_duplicates = [];
                 foreach($check_duplicate as $dd) {
                     $data_duplicates[] = array(
                         'event_name' => $dd->event_name,
@@ -390,13 +397,10 @@ class RentController extends Controller
                         'time_end' => $dd->time_end
                     );
                 }
-                if(count($data_duplicates) > 1){
-                    return ResponseJson::response('failed', 400,'Maaf ada data duplicate, silahkan check kembali.', $data_duplicates);
-                }
             }
 
             DB::commit();
-            return ResponseJson::response('success', 'Success Update Status Rent.', 200, null);
+            return ResponseJson::response('success', 'Success Update Status Rent.', 200, ['data_duplicates' => $data_duplicates]);
         } catch (\Exception $e) {
             DB::rollback();
             return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]);
