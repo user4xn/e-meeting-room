@@ -186,7 +186,8 @@ class ReportController extends Controller
                     'date_end',
                     'time_start',
                     'time_end',
-                    'rents.status'
+                    'rents.status',
+                    'rents.organization'
                 )
                 ->get()
                 ->toArray();
