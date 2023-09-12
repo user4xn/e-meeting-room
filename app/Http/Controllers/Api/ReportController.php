@@ -239,17 +239,21 @@ class ReportController extends Controller
             }
             $rent = Rent::where('id', $rent_id)
                 ->where('status', 'done')
-                ->with('Report', 'UserResponsible', 'UserVerificator')
+                ->with('UserResponsible', 'UserVerificator')
                 ->first()
                 ->toArray();
+            $report = Report::where('rent_id', $rent_id)
+                ->select('id', 'rent_id', 'date_report')
+                ->first();;
+            if($report){
+                $rent_file = ReportDetail::where('report_id', $report->id)
+                    ->select('path', 'type', 'created_at')
+                    ->get();
+            }else{
+                $rent_file = [];
+            }
 
-            $rent_file = Report::where('rent_id', $rent_id)
-                ->join('report_details as rd', 'rd.report_id', '=', 'reports.id')
-                ->where('type', 'image')
-                ->get()
-                ->pluck('path')
-                ->toArray();
-
+            $rent['report'] = $report;
             $rent['report_file'] = $rent_file;
             $rent['setting'] = Setting::select('office_number', 'address')->first();
             return ResponseJson::response('success', 'Success Get Detail Report Rent.', 200, $rent);
@@ -322,22 +326,23 @@ class ReportController extends Controller
             return ResponseJson::response('success', 'Data Rent Not Found.', 400, null);
         }
         $rent_name = str_replace(' ', '_', strtolower($check_rent->event_name));
-        $data = [];
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $imageName = $rent_name . '_' . time() . '_' . $image->getClientOriginalExtension();
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $image) {
+                $extension = $image->getClientOriginalExtension();
+                $type_file = ($extension == "jpg" || $extension == "png" || $extension == "jpeg" || $extension == "webp") ? "image" : "doc";
+                $imageName = $rent_name . '_' . time() . '.' . $image->getClientOriginalExtension();
                 $image->storeAs('report/rent', $imageName, 'public');
                 $path = '/report/rent/' . $imageName;
                 $check_report = Report::select('id')->first();
                 $report = new ReportDetail();
                 $report->report_id = $check_report->id;
                 $report->path = $path;
-                $report->type = "doc";
+                $report->type = $type_file;
                 $report->save();
                 $data[] = $imageName;
             }
         }
 
-        return ResponseJson::response('success', 'Success Report Rent.', 201, $data);
+        return ResponseJson::response('success', 'Success Report Rent.', 201, null);
     }
 }
