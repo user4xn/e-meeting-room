@@ -337,9 +337,10 @@ class ReportController extends Controller
         $rent_name = str_replace(' ', '_', strtolower($check_rent->event_name));
         if ($request->hasFile('files')) {
             foreach ($request->file('files') as $image) {
+                $file_name = str_replace(' ', '_', strtolower($image->getClientOriginalName()));
                 $extension = $image->getClientOriginalExtension();
                 $type_file = ($extension == "jpg" || $extension == "png" || $extension == "jpeg" || $extension == "webp") ? "image" : "doc";
-                $imageName = $rent_name . '_' . time() . '.' . $image->getClientOriginalExtension();
+                $imageName = time().'_'.$file_name;
                 $image->storeAs('report/rent', $imageName, 'public');
                 $path = '/report/rent/' . $imageName;
                 
