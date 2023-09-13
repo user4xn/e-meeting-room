@@ -14,6 +14,7 @@ use App\Models\Setting;
 use PDF;
 use Carbon\Carbon;
 use DataTables;
+use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
@@ -352,5 +353,33 @@ class ReportController extends Controller
         }
 
         return ResponseJson::response('success', 'Success Report Rent.', 201, null);
+    }
+
+    public function deleteAttachment($file_id)
+    {
+       
+
+        $file = ReportDetail::where('id', $file_id)
+            ->first();
+        if(!$file){
+            return ResponseJson::response('success', 'No Data File Report Rent.', 404, null);
+        }
+        $url = $file->path;
+        $baseUrl = asset('');
+        $cleanedUrl = str_replace($baseUrl, '', $url);
+        if (file_exists(public_path($cleanedUrl))) {
+            if (unlink(public_path($cleanedUrl))) {
+                ReportDetail::where('id', $file_id)
+                    ->delete();
+                return ResponseJson::response('success', 'Success Delete File Report.', 200, null);
+            } else {
+                ReportDetail::where('id', $file_id)
+                    ->delete();
+                return ResponseJson::response('success', 'Success Delete File Report.', 200, null);
+            }
+        } else {
+            return ResponseJson::response('failed', 'Failed Delete File Report.', 400, null);
+        }
+        return ResponseJson::response('success', 'Success Delete File Report.', 200, null);
     }
 }
