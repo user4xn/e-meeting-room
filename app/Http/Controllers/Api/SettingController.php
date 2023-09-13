@@ -9,6 +9,11 @@ use App\Models\Setting;
 
 class SettingController extends Controller
 {
+    public function index()
+    {
+        $setting = Setting::select('office_number', 'address')->first();
+        return ResponseJson::response('success', 'Success Setting Web.', 200, $setting);
+    }
     public function setting(Request $request)
     {
         try{

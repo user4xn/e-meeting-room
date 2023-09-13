@@ -79,6 +79,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     });
 
     $router->group(['prefix' => 'v1/setting'], function ($router) {
-        $router->post('/', [SettingController::class, 'setting']);
+        $router->get('/', [SettingController::class, 'index']);
+        $router->post('/store', [SettingController::class, 'setting']);
     });
 });
