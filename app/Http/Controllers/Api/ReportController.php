@@ -250,7 +250,7 @@ class ReportController extends Controller
                 ->first();;
             if($report){
                 $rent_file = ReportDetail::where('report_id', $report->id)
-                    ->select('path', 'type', 'created_at')
+                    ->select('id','path', 'type', 'created_at')
                     ->get();
             }else{
                 $rent_file = [];
