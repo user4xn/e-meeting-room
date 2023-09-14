@@ -85,7 +85,7 @@
         <div id="header-email">
             <div class="logo-wrapper">
                 <div class="brand-logo">
-                    <img src="asset('images/logo-sirupat-email.png')" alt="">
+                    <img src="{{ asset('images/logo-sirupat-email.png') }}" alt="">
                 </div>
             </div>
         </div>
