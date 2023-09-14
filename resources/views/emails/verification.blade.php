@@ -1,53 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Email Verifikasi OTP - Sirupat</title>
     <style>
-        @import url('https://fonts.cdnfonts.com/css/roboto');
         * {
-            font-family: helvetica;
+            font-family: Helvetica, sans-serif;
             font-weight: 400;
             font-size: 14px;
-            color: #000000;
+            color: #000;
         }
-        .box-container{
+
+        h3 {
+            font-weight: 700;
+            font-size: 20px;
+            margin: 10px 0;
+        }
+
+        #container {
             width: 100%;
             max-width: 600px;
             margin: 0 auto;
         }
-        img{
-            margin-bottom: 25px;
-            width: 180px;
-        }
-        p{
-            margin-top: 10px;
-            display: block;
-        }
-        .btn-verification {
-            width: 120px;
-            display: block;
-            line-height: 40px;
+
+        #header {
+            background-color: #f4f4f4;
             text-align: center;
-            background-color: #0068FF;
-            text-decoration: none;
+            padding: 2.5% 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .brand-logo svg {
+            width: 30px;
+            height: 30px;
+            fill: #CF5C5C;
+        }
+
+        .brand-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-left: 10px;
+            text-align: center;
+        }
+
+        #content {
+            padding: 0 5%;
+            text-align: justify;
+        }
+
+        .badge {
+            height: 30px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .badge-primary {
+            background-color: #f06767;
+            padding: 10px 25px;
             color: #fff;
-            font-size: 16px;
-            border-radius: 4px;
-            margin-bottom: 10px;
+            font-weight: 700;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+
+        #footer {
+            background-color: #f4f4f4;
+            padding: 30px 0;
+            text-align: center;
+        }
+
+        #footer span {
+            display: block;
+            font-size: 12px;
         }
     </style>
 </head>
 
 <body>
-    <div class="box-container">
-        <h1>Konfirmasi Email</h1>
-        <p>verifikasi email kamu untuk mendapatkan akses ke e-meeting.</p>
-        <a href="{{ $url }}" class="btn-verification">Konfirmasi</a>
-        <p>abaikan email ini jika kamu tidak merasa dalam anggota e-meeting.</p>
+    <div id="container">
+        <div id="header">
+            <div class="logo-wrapper">
+                <span class="brand-logo">
+                    <img src="{{asset('images/logo-sirupat.png')}}" alt="">
+                </span>
+                <span class="brand-name">SIRUPAT</span>
+            </div>
+        </div>
+        <div id="content">
+            <h3>Halo, {{ $name }}</h3>
+            <p>
+                Verifikasi email kamu untuk mendapatkan akses ke Sirupat.
+            </p>
+            <div class="badge">
+                <a href="{{ $url }}" class="badge-primary">Konfirmasi</a>
+            </div>
+            <p>Abaikan email ini jika kamu tidak merasa dalam anggota Sirupat.</p>
+        </div>
+        <div id="footer">
+            <span>SIRUPAT&nbsp;&copy;&nbsp;Copyright 2023</span>
+        </div>
     </div>
 </body>
 

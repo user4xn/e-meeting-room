@@ -2,6 +2,8 @@
 
 namespace App\Mail;
 
+use App\Models\User;
+use App\Models\UserDetail;
 use App\Models\UserEmailOtp;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -52,10 +54,14 @@ class EmailOtpLogin extends Mailable
             $store_otp->otp = $otp;
             $store_otp->save();
         }
+        $user = UserDetail::where('id', $this->user_id)
+            ->select('name')
+            ->first();
         return new Content(
             view: 'emails.otp_login',
             with: [
                 'otp' => $otp,
+                'name' => $user->name,
             ],
         );
     }

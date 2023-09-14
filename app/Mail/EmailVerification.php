@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\UserDetail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -21,9 +22,12 @@ class EmailVerification extends Mailable
 
     public function build()
     {
+        $user = UserDetail::where('id', $this->user_id)
+            ->select('name')
+            ->first();
         $url = route('users.emailVerification').'?data='.Crypt::encrypt($this->user_id);
         return $this->subject('Verifikasi Email')
                     ->from(env('MAIL_USERNAME'), 'E-Meeting')
-                    ->markdown('emails.verification', ['url' => $url]);
+                    ->markdown('emails.verification', ['url' => $url, 'name' => $user->name]);
     }
 }
