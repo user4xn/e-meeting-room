@@ -33,21 +33,25 @@
         }
 
         .logo-wrapper {
-            display: flex;
+            width: 50%;
+            display: block;
             justify-content: center;
             align-items: center;
+            text-align: center;
+            margin: auto;
         }
 
-        .brand-logo svg {
-            width: 30px;
-            height: 30px;
-            fill: #CF5C5C;
+        .brand-logo {
+            display: inline-block;
+            margin-top: 5px;
         }
 
         .brand-name {
             font-size: 24px;
             font-weight: 700;
             margin-left: 10px;
+            margin-top: -10px;
+            text-align: center;
         }
 
         #content {
