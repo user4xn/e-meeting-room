@@ -59,6 +59,13 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasOne(UserDetail::class, 'user_id');
     }
 
+    public function menuAccess()
+    {
+        return $this->hasMany(UserMenuAccess::class, 'user_id')
+            ->join('master_menus as mm', 'mm.id', '=', 'user_menu_accesses.master_menu_id')
+            ->select('user_menu_accesses.user_id', 'mm.id as master_menu_id', 'mm.menu_name');
+    }
+
     public function getCreatedAtAttribute($value)
     {
         return date('Y-m-d H:i:s', strtotime($value));

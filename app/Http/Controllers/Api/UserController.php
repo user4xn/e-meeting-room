@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseJson;
 use App\Mail\EmailVerification;
+use App\Models\MasterMenu;
 use App\Models\Rent;
 use App\Models\User;
 use App\Models\UserDetail;
+use App\Models\UserMenuAccess;
 use Crypt;
 use DB;
 use Auth;
@@ -78,7 +80,8 @@ class UserController extends Controller
                 'nip' => 'required|unique:user_details,nip',
                 'name' => 'required|string',
                 'phone_number' => 'required|string',
-                'address' => 'required|string'
+                'address' => 'required|string',
+                'menu_access' => 'required',
             ], [
                 'username.required' => 'Please input username.',
                 'email.required' => 'Please input email.',
@@ -89,6 +92,7 @@ class UserController extends Controller
                 'name.required' => 'Please input name.',
                 'phone_number.required' => 'Please input phone number.',
                 'address.required' => 'Please input address.',
+                'menu_access.required' => 'Please input Menu Access.',
             ]);
             if ($validator->fails()) {
                 return ResponseJson::response('failed', 'Error Validation', 422, ['error' => $validator->errors()]);
@@ -109,6 +113,25 @@ class UserController extends Controller
             $store_user_detail->phone_number = $request->phone_number;
             $store_user_detail->address = $request->address;
             $store_user_detail->save();
+
+            $menu_access = explode(",",$request->menu_access);
+            foreach($menu_access as $mm){
+                $check_menu = MasterMenu::select('id')
+                    ->where('id', $mm)
+                    ->first();
+                if($check_menu){
+                    $check_menu = UserMenuAccess::select('id')
+                        ->where('id', $mm)
+                        ->where('user_id', $store_user->id)
+                        ->first();
+                    if(!$check_menu){
+                        $access = new UserMenuAccess();
+                        $access->user_id = $store_user->id;
+                        $access->master_menu_id = $mm;
+                        $access->save();
+                    }
+                }
+            }
 
             $data = array(
                 'user_id' => $store_user->id,
@@ -189,6 +212,29 @@ class UserController extends Controller
                 $check_user_detail->fresh();
             }
 
+            $menu_access = explode(',',$request->menu_access);
+            if($menu_access){
+                UserMenuAccess::where('user_id', $id)
+                    ->delete();
+                foreach($menu_access as $mm){
+                    $check_menu = MasterMenu::select('id')
+                        ->where('id', $mm)
+                        ->first();
+                    if($check_menu){
+                        $check_menu = UserMenuAccess::select('id')
+                            ->where('id', $mm)
+                            ->where('user_id', $id)
+                            ->first();
+                        if(!$check_menu){
+                            $access = new UserMenuAccess();
+                            $access->user_id = $id;
+                            $access->master_menu_id = $mm;
+                            $access->save();
+                        }
+                    }
+                }
+            }
+
             $data = array(
                 'user_id' => $check_user->id,
                 'username' => $check_user->username,
@@ -243,7 +289,7 @@ class UserController extends Controller
             }
             $user = User::select('id', 'username', 'email','role', 'status')
                 ->where('id', $request->User()->id)
-                ->with('userDetail')
+                ->with('userDetail', 'menuAccess')
                 ->first();
             return ResponseJson::response('success', 'Success Get Profile User', 200, $user);
         }catch(\Exception $e){

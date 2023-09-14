@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\RentController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\GuestController;
 use App\Http\Controllers\Api\LandingpageController;
+use App\Http\Controllers\Api\MasterMenuController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SettingController;
 use Illuminate\Http\Request;
@@ -82,5 +83,8 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->group(['prefix' => 'v1/setting'], function ($router) {
         $router->get('/', [SettingController::class, 'index']);
         $router->post('/store', [SettingController::class, 'setting']);
+    });
+    $router->group(['prefix' => 'v1/menu'], function ($router) {
+        $router->get('/list', [MasterMenuController::class, 'index']);
     });
 });
