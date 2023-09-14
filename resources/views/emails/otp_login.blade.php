@@ -26,7 +26,7 @@
             margin: 0 auto;
         }
 
-        #header {
+        #header-email {
             background-color: #f4f4f4;
             text-align: center;
             padding: 2.5% 0;
@@ -34,24 +34,16 @@
 
         .logo-wrapper {
             width: 50%;
-            display: block;
             justify-content: center;
             align-items: center;
-            text-align: center;
             margin: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-
-        .brand-logo {
-            display: inline-block;
-            margin-top: 5px;
-        }
-
-        .brand-name {
-            font-size: 24px;
-            font-weight: 700;
-            margin-left: 10px;
-            margin-top: -10px;
-            text-align: center;
+        .brand-logo{
+			display: block;
+            margin: auto;
         }
 
         #content {
@@ -90,12 +82,11 @@
 
 <body>
     <div id="container">
-        <div id="header">
+        <div id="header-email">
             <div class="logo-wrapper">
-                <span class="brand-logo">
-                    <img src="{{asset('images/logo-sirupat.png')}}" alt="">
-                </span>
-                <span class="brand-name">SIRUPAT</span>
+                <div class="brand-logo">
+                    <img src="asset('images/logo-sirupat-email.png')" alt="">
+                </div>
             </div>
         </div>
         <div id="content">
