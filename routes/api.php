@@ -86,5 +86,6 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     });
     $router->group(['prefix' => 'v1/menu'], function ($router) {
         $router->get('/list', [MasterMenuController::class, 'index']);
+        $router->get('/access/list', [MasterMenuController::class, 'getAccessMenu']);
     });
 });
