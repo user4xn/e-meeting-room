@@ -54,7 +54,7 @@ class EmailOtpLogin extends Mailable
             $store_otp->otp = $otp;
             $store_otp->save();
         }
-        $user = UserDetail::where('id', $this->user_id)
+        $user = UserDetail::where('user_id', $this->user_id)
             ->select('name')
             ->first();
         return new Content(

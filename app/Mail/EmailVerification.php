@@ -22,7 +22,7 @@ class EmailVerification extends Mailable
 
     public function build()
     {
-        $user = UserDetail::where('id', $this->user_id)
+        $user = UserDetail::where('user_id', $this->user_id)
             ->select('name')
             ->first();
         $url = route('users.emailVerification').'?data='.Crypt::encrypt($this->user_id);
