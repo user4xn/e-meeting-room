@@ -240,6 +240,27 @@ class UserController extends Controller
         }
     }
 
+    public function detail($id)
+    {
+        try{
+            $check_user = Auth::user();
+            if(empty($check_user)) {
+                return ResponseJson::response('failed', 'Unauthorized', 401, null);
+            }
+            $user = User::select('id', 'username', 'email','role', 'status')
+                ->where('id', $id)
+                ->with('userDetail', 'menuAccess')
+                ->first();
+            if(!$user){
+                return ResponseJson::response('failed', 'User Not Found!', 404, null); 
+            }
+
+            return ResponseJson::response('success', 'Success Get Detail User', 200, $user);
+        }catch(\Exception $e){
+            return ResponseJson::response('failed', 'Something Wrong Error.', 500, ['error' => $e->getMessage()]); 
+        }
+    }
+
     public function destroy($id)
     {
         DB::beginTransaction();

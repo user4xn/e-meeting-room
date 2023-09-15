@@ -42,6 +42,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
     $router->group(['prefix' => 'v1/users'], function ($router) {
         $router->get('/list', [UserController::class, 'index']);
         $router->post('/store', [UserController::class, 'store']);
+        $router->get('/detail/{id}', [UserController::class, 'detail']);
         $router->post('/update/{id}', [UserController::class, 'update']);
         $router->delete('/delete/{id}', [UserController::class, 'destroy']);
     });
