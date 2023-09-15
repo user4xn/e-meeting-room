@@ -28,9 +28,6 @@ class UserController extends Controller
             if(empty($check_user)) {
                 return ResponseJson::response('failed', 'Unauthorized', 401, null);
             }
-            if($check_user->role != "Admin"){
-                return ResponseJson::response('failed', 'You not have access!', 403, null); 
-            }
             $fetch = User::with('userDetail')
                 ->orderBy('created_at', 'DESC')
                 ->where('role', 'User')
@@ -69,9 +66,6 @@ class UserController extends Controller
             $check_user = Auth::user();
             if(empty($check_user)) {
                 return ResponseJson::response('failed', 'Unauthorized', 401, null);
-            }
-            if($check_user->role != "Admin"){
-                return ResponseJson::response('failed', 'You not have access!', 403, null); 
             }
             $validator = Validator::make($request->all(), [
                 'username' => 'required|string',
@@ -155,9 +149,6 @@ class UserController extends Controller
             $check_user = Auth::user();
             if(empty($check_user)) {
                 return ResponseJson::response('failed', 'Unauthorized', 401, null);
-            }
-            if($check_user->role != "Admin"){
-                return ResponseJson::response('failed', 'You not have access!', 403, null); 
             }
             $check_user = User::find($id);
             if(!$check_user){
@@ -256,9 +247,6 @@ class UserController extends Controller
             $check_user = Auth::user();
             if(empty($check_user)) {
                 return ResponseJson::response('failed', 'Unauthorized', 401, null);
-            }
-            if($check_user->role != "Admin"){
-                return ResponseJson::response('failed', 'You not have access!', 403, null); 
             }
             $check_user = User::find($id);
             if(!$check_user){
