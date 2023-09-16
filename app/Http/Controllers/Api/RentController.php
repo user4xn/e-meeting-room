@@ -37,7 +37,7 @@ class RentController extends Controller
                     ->leftjoin('user_details as vud', 'vud.user_id', '=', 'rents.verificator_user_id')
                     ->select('ud.name as user_name', 'ud.phone_number as user_phone', 'vud.name as verificator_name', 'vud.phone_number as verificator_phone', 'rents.*')
                     ->where('status', '!=', 'expired')
-                    ->where('user_id', Auth::user()->id)
+                    ->where('rents.user_id', Auth::user()->id)
                     ->get()
                     ->toArray();
             } else {
