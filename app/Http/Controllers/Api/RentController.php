@@ -72,8 +72,8 @@ class RentController extends Controller
                     'notes' => $new['notes'],
                     'user_name' => $new['user_name'] ?? '',
                     'user_phone' => $new['user_phone'] ?? '',
-                    'verificator_name' => $new['verificator_name'],
-                    'verificator_phone' => $new['verificator_phone'],
+                    'verificator_name' => $new['verificator_name'] ?? '',
+                    'verificator_phone' => $new['verificator_phone'] ?? '',
                     'created_at' => $new['created_at'],
                     'updated_at' => $new['updated_at'],
                 ];
