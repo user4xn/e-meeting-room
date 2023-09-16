@@ -33,6 +33,9 @@ class RentController extends Controller
                         return $query->whereDate('date_start', '>=', $request->start_date)
                             ->whereDate('date_start', '<=', $request->end_date);
                     })
+                    ->leftjoin('user_details as ud', 'ud.user_id', '=', 'rents.user_id')
+                    ->leftjoin('user_details as vud', 'vud.user_id', '=', 'rents.verificator_user_id')
+                    ->select('ud.name as user_name', 'ud.phone_number as user_phone', 'vud.name as verificator_name', 'vud.phone_number as verificator_phone', 'rents.*')
                     ->where('status', '!=', 'expired')
                     ->where('user_id', Auth::user()->id)
                     ->get()
