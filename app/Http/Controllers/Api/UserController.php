@@ -28,11 +28,19 @@ class UserController extends Controller
             if(empty($check_user)) {
                 return ResponseJson::response('failed', 'Unauthorized', 401, null);
             }
-            $fetch = User::with('userDetail')
-                ->orderBy('created_at', 'DESC')
-                ->where('role', 'User')
-                ->get()
-                ->toArray();
+            if($check_user->role == "Admin"){
+                $fetch = User::with('userDetail')
+                    ->orderBy('created_at', 'DESC')
+                    ->whereIn('role', ['Admin', 'User'])
+                    ->get()
+                    ->toArray();
+            }else{
+                $fetch = User::with('userDetail')
+                    ->orderBy('created_at', 'DESC')
+                    ->where('role', 'User')
+                    ->get()
+                    ->toArray();
+            }
             $i = 0;
             $reform = array_map(function($new) use (&$i) { 
                 $i++;
