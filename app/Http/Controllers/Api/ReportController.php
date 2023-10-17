@@ -63,6 +63,7 @@ class ReportController extends Controller
                     'room_capacity',
                     'room_name'
                 )
+                ->orderBy('rents.created_at', 'DESC')
                 ->get()
                 ->toArray();
 
@@ -130,6 +131,7 @@ class ReportController extends Controller
                     'room_capacity',
                     'room_name'
                 )
+                ->orderBy('rents.created_at', 'DESC')
                 ->get()
                 ->toArray();
 
@@ -190,6 +192,7 @@ class ReportController extends Controller
                     'rents.status',
                     'rents.organization'
                 )
+                ->orderBy('rents.created_at', 'DESC')
                 ->get()
                 ->toArray();
 
@@ -288,7 +291,9 @@ class ReportController extends Controller
     public function listReportRentPdf()
     {
         try {
-            $fetch = Rent::get()->toArray();
+            $fetch = Rent::orderBy('rents.created_at', 'DESC')
+                ->get()
+                ->toArray();
 
             $i = 0;
             $reform = array_map(function ($new) use (&$i) {
