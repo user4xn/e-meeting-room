@@ -271,6 +271,7 @@ class ReportController extends Controller
     public function listGuestByRent($rent_id)
     {
         $check_rent = Rent::join('user_details as ud', 'ud.user_id', '=', 'rents.user_id')
+            ->where('rents.id', $rent_id)
             ->first();
         if (!$check_rent) {
             return ResponseJson::response('failed', 'Data Rent Not Found.', 404, null);
