@@ -288,6 +288,32 @@ class ReportController extends Controller
 
         return ResponseJson::response('success', 'Success Get List Guest.', 200, $data);
     }
+    
+    public function listGuestExportPDF($rent_id)
+    {   
+        $fetch = Guest::where('rent_id', $rent_id)
+            ->select('name', 'phone_number', 'position', 'work_unit', 'signature', 'created_at')
+            ->get()
+            ->toArray();
+
+        $reform = array_map(function ($new) use (&$i) {
+            $i++;
+            return [
+                'no' => $i,
+                'name' => $new['name'],
+                'phone_number' => $new['phone_number'],
+                'position' => $new['position'],
+                'work_unit' => $new['work_unit'],
+                'signature' => $new['signature'],
+                'created_at' => $new['created_at'],
+            ];
+        }, $fetch);
+        $data = array(
+            'guests' => $reform
+        );
+        $pdf = PDF::loadView('pdf.report_guest', $data);
+        return $pdf->stream();
+    }
 
     public function listReportRentPdf()
     {

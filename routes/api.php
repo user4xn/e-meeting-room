@@ -71,6 +71,7 @@ Route::group(['middleware' => 'auth:api'], function ($router) {
         $router->get('/detail-report/{rent_id}', [ReportController::class, 'detailReportRent']);
         $router->get('/list-guest/{rent_id}', [ReportController::class, 'listGuestByRent']);
         $router->get('/list-rent/pdf', [ReportController::class, 'listReportRentPdf']);
+        $router->get('/list-guest/pdf/{rent_id}', [ReportController::class, 'listGuestExportPDF']);
         $router->get('/detail/rent/{id}', [ReportController::class, 'detailReportRent']);
         $router->post('/rent/upload/{rent_id}', [ReportController::class, 'bulkReportAttachment']);
         $router->delete('/rent/upload/delete/{file_id}', [ReportController::class, 'deleteAttachment']);
