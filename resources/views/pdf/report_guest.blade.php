@@ -19,7 +19,7 @@
                 <th scope="col" width="60">Jabatan</th>
                 <th scope="col" widht="60">Unit Kerja</th>
                 <th scope="col" width="100">Waktu Absen</th>
-                <th scope="col" width="100">Tanda Tangan</th>
+                {{-- <th scope="col" width="100">Tanda Tangan</th> --}}
             </tr>
         </thead>
         <tbody>
@@ -30,9 +30,9 @@
                     <td>{{ $guest['position'] }}</td>
                     <td>{{ $guest['work_unit'] }}</td>
                     <td>{{ Carbon\Carbon::parse($guest['created_at'])->format('Y-m-d H:i:s') }}</td>
-                    <td>
+                    {{-- <td>
                         <img src="{{ $guest['signature'] }}" width="100" alt="">
-                    </td>
+                    </td> --}}
                 </tr>
             @endforeach
         </tbody>
