@@ -308,12 +308,22 @@ class ReportController extends Controller
                 'created_at' => $new['created_at'],
             ];
         }, $fetch);
+        
         $data = array(
             'guests' => $reform
         );
+        
         $pdf = PDF::loadView('pdf.report_guest', $data);
-        return $pdf->stream();
+        
+        // Generate PDF
+        $pdfData = $pdf->output();
+        
+        // Convert PDF to base64
+        $base64Pdf = base64_encode($pdfData);
+        
+        return $base64Pdf;
     }
+
 
     public function listReportRentPdf()
     {
